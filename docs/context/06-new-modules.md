@@ -20,7 +20,7 @@
 
 ## B. Procurement (SoMS procedure SOMSQP-PRO-01, Issue 02, 06-07-2026)
 
-**Source:** `procurement/SoMSQP PRO 01 2026.pdf` (the owner adds it). Built to sections **5.1–5.11**, **configurable per organisation**, so other clients can use their own steps, with SoMS as the first template.
+**Source:** `procurement/SoMSQP PRO 01 2026.pdf` (shared 17-11-2026; summary in `procurement/README.md`). Built to sections **5.1–5.11**, **configurable per organisation**, so other clients can use their own steps, with SoMS as the first template.
 
 ### Step by step
 
@@ -45,9 +45,74 @@
 - **Order of steps:** HOD approves the need → PM reviews → Executive collects ≥2 quotes and picks one → Accounts approves that amount → Director if above the DoFA limit → PO.
 - **No vendor logins.** Staff record vendor registration, quotes, acknowledgement and invoices with the vendor's files. Vendors get the PO by email.
 
+### Decisions (owner, 17-11-2026)
+
+- **DoFA bands are configurable** per organisation ("Who approves what" settings). No code change is needed when the values arrive.
+- **The step order is confirmed:** HOD → Procurement Manager review → Executive collects quotes → Accounts → Director above the DoFA limit → PO.
+- **Hierarchy = departments with heads, nested.** A person belongs to one department. There's no per-person "reports to".
+- **Requester heads their own department, or the department has no head:** the approval goes **up** to the parent department's head. At the top, it goes to the Director / Principal.
+- **New roles:** Dean and Quality Manager.
+
+### Roles
+
+Roles are per membership and combinable.
+
+| In the procedure | In AssetNXG | Can do |
+|---|---|---|
+| Requisitioner (§5.1) | Any member with a department | Raise requisitions and material requests; track their own; join the receipt check (§5.8) |
+| Department Head (HOD) | **The head of a department**: set on the department, not a role (`hod` stays in the enum, hidden from pickers) | Approve their department's requisitions (and sub-departments' when escalated); see their department's requisitions |
+| Procurement Manager | `procurement_manager` | Review step; approve vendor registrations and evaluations (FL2, FL4); monthly urgent review (§5.6.3); all procurement records |
+| Procurement Executive | `procurement_executive` | Quotes, chosen quote, PO (FL5), receipt sign-off (FL6), feedback (FL3), invoice check (§5.10), stock |
+| Accounts Team | `accounts` | Spend approval per DoFA; payments |
+| Director / Principal | `director` | High-value approval; urgent approval; quality review of significant purchases |
+| Dean | `dean` (new) | Urgent approval with the Director (§5.6.2); can sit in DoFA bands |
+| Building Security Supervisor | `security_supervisor` | Receipt check (§5.8) |
+| Store In-charge | `store_incharge` | Issues against material requests (FL7); monthly stock count (FL8) |
+| Quality Manager / Head of Compliance | `quality_manager` (new) | Non-conformity flags (§9.2), recurring-urgent alerts (§5.6.3), KPI page (§8); read-only on procurement records |
+| Principal, Head of Accounts (PO copies, §5.7) | Setting: **PO copy recipients** | Get the PO email copy |
+
+### Approvals and hierarchy
+
+**Department hierarchy** (built in Phase 2 with People):
+- `departments.parent_id`, with a trigger that refuses cycles.
+- `head_user_id` must be an active member and not a support login.
+- `memberships.department_id`.
+- `approval_delegations` (from, to, start and end dates in IST, reason) covers an approver on leave.
+- `private.resolve_department_approver(dept, requester)`:
+  1. Walk up from the requester's department to the first head who is set, active and not the requester.
+  2. Use their delegate if one is active today.
+  3. Past the top, go to the `director` role.
+  4. Record a plain note, e.g. "Sent to the head of Academics because the requester heads Marine Engineering".
+
+**"Who approves what"** (settings, Admin only, every change in `audit_log`):
+- `approval_steps`: route (standard / urgent), stage (need / spend), position, label, approver (department head / role), roles (any of), amount_from, amount_to, active.
+- A step applies when the amount is in `[amount_from, amount_to)`; empty means no limit. That covers both cumulative DoFA (Accounts always, plus Director above ₹X) and exclusive bands (Dean ₹1L–5L, Director above ₹5L).
+- Need-stage amount = the requisition's estimate. Spend-stage amount = the chosen quote's total, with tax by default (setting).
+- The screen lists the steps and shows a live band preview: "Up to ₹1,00,000: HOD → PM → Accounts · Above ₹1,00,000: … → Director".
+- **SoMS template:**
+  - Standard, need: HOD → Procurement Manager.
+  - Standard, spend: Accounts → Director (above the DoFA limit).
+  - Urgent: Dean or Director; minimum quotes 1; FL10 fields required.
+  - Until the DoFA values arrive, the Director step has no lower limit (over-approve, never under-approve).
+
+**Running an approval:**
+- `approvals` rows (generic `entity_table`, `entity_id`) are a **snapshot** taken when a stage starts, so editing settings never changes requests in flight.
+- **Submit** creates the need-stage rows. **Need approved** puts the request in the Executive's queue. **The chosen quote** (≥ minimum quotes unless urgent) creates the spend-stage rows. **All approved** allows a PO; a trigger refuses a PO before that. **An amount change** after approval restarts the spend stage.
+- `decide_approval(id, approve | send_back | reject, remarks)` checks:
+  - the caller is the assignee, their active delegate, or holds the step's role;
+  - the caller is **never the requester**;
+  - nobody approves two steps of the same request (setting, default on). If no one else is eligible, it says so plainly.
+  - Remarks are required to send back or reject. Send back returns the request to the requester to edit and resubmit. Reject closes it.
+- New notification types: `approval_requested`, `approval_returned`, `approval_rejected` and `requisition_approved`. A reminder follows after N days (setting). Urgent requests show the 48 h clock.
+- Who sees a requisition:
+  - the requester;
+  - the heads of its department and of every department above it;
+  - Procurement Manager, Procurement Executive, Accounts, Director, Dean and Quality Manager;
+  - anyone with a pending approval on it.
+
 ### Cross-cutting
 
-- **Roles / permissions** (per membership, combinable): Procurement Manager, Procurement Executive, HOD (department head; v1 already stores `head_user_id`), Accounts, Director/Principal (Dean), Building Security Supervisor, Store In-charge.
+- **Roles / permissions:** see "Roles" above.
 - **Audit trail** of every step (who, when, remarks), for ISO 9001 (§9).
 - **Files by year and category** (§7.1); retention periods per record type as settings (§7: e.g. PO 8 years, requisition 5 years).
 - **KPIs** (§8): registered vendors and changes (annual); urgent requisitions (monthly); urgent closure ≤ 48 h; non-conformities.
@@ -57,12 +122,13 @@
 ### Tables (sketch)
 
 - `vendor_registrations`, `vendor_evaluations`, `vendor_feedback`
-- `requisitions`, `requisition_items`, `approvals` (generic: entity, step, approver, decision, remarks, at)
+- `requisitions`, `requisition_items`, `approvals` (generic snapshot rows: entity, stage, position, approver, assignee, status, decided by/at, remarks, route note)
+- `approval_steps` ("Who approves what" settings); `approval_delegations` and the `departments` hierarchy (Phase 2)
 - `quotations`, `quotation_items`
 - `purchase_orders`, `po_items`, `goods_receipts`, `receipt_items`
 - `invoices`, `payments`, `material_requests`, `material_request_items`
 - `stock_movements`, `stock_counts`, `stock_count_lines`
-- `procurement_settings` (DoFA bands, minimum quotes, number formats, retention, reminder offsets)
+- `procurement_settings` (minimum quotes, amount-includes-tax, one-approval-per-person, PO copy recipients, number formats, retention, reminder offsets)
 - `non_conformities`
 
 ## C. AI assistant ("Ask AssetNXG")

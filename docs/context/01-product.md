@@ -46,7 +46,9 @@ Inspections can be assigned to any staff member (Technician, Housekeeping, Facul
 - **Guests** sign in on the "Guest access" tab with name, email and mobile number, usually after scanning a room's QR code. Each guest visit is a new anonymous account; a returning guest sees earlier requests matched by email. A staff email is refused on guest sign-in.
 - A person can never choose or change their own role. Self-registration becomes Guest.
 
-v2 adds procurement roles (see `06-new-modules.md`): Procurement Manager, Procurement Executive, HOD, Accounts, Director/Principal, Building Security Supervisor and Store In-charge. These are **permissions on a membership**, and one person can hold several.
+v2 adds procurement roles (see `06-new-modules.md` §B): Procurement Manager, Procurement Executive, Accounts, Director/Principal, Dean, Building Security Supervisor, Store In-charge and Quality Manager. These are **permissions on a membership**, and one person can hold several.
+
+**Head of department is not a role** (owner, 17-11-2026). It is the person set as head on a department. Departments can sit under other departments, and approvals go up that hierarchy. The old `hod` role value stays in the database but is hidden from role pickers.
 
 ## White-label
 

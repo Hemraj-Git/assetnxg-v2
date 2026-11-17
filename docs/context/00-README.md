@@ -21,7 +21,7 @@ This folder carries everything known about AssetNXG v1 (the live app) into the v
 - `reference/attemptWindow.ts`, `housekeeping.ts`, `idGenerator.ts`: small v1 rule modules worth porting.
 - `reference/old-send-push-edge-function.ts`: v1's Web Push Edge Function (self-generated VAPID keys).
 - `manual/*.html`: v1's user manual (admin guide, field guide, getting started, quick cards). Good for wording and flows.
-- `procurement/`: SoMS's procurement procedure (SOMSQP-PRO-01). **The product owner adds the PDF here.**
+- `procurement/`: SoMS's procurement procedure (SOMSQP-PRO-01, Issue 02). The PDF and a summary of it are in this folder.
 
 **Sources of truth, in order:**
 1. The product owner.
@@ -37,7 +37,7 @@ This folder carries everything known about AssetNXG v1 (the live app) into the v
 
 0. Set up the project: Next.js, Supabase CLI and shadcn. Then auth, organisations and memberships (roles), and the RLS pattern.
 1. Design system and app shell (canvas Phase 1).
-2. Core data: locations, categories and sub-categories, checklist templates, assets, spares, vendors, documents, people.
+2. Core data: locations, categories and sub-categories, checklist templates, assets, spares, vendors, documents, people. People includes the **department hierarchy** (nested departments with heads, approval delegations) and the Dean and Quality Manager roles, so procurement approvals have them ready (`06-new-modules.md` §B).
 3. Operations (canvas Phase 2): service requests, work orders, PM and inspection schedules, housekeeping, outside repairs, reservations, notifications, reports.
 4. Field app (`/mobile`), ported from v1's current field app.
 5. New modules: warranty and AMC reminders, then procurement, then the AI assistant.

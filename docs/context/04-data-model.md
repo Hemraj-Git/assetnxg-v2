@@ -62,6 +62,11 @@ From `reference/old-schema-baseline-0056.sql` plus 0057 and 0058. In v1, ids are
 3. **Real types:** uuid ids, `date` / `timestamptz` columns (no text dates), numeric money, enums or check constraints for statuses.
 4. **Stock movements** (new): every quantity change is a row (item, qty ±, reason, reference, balance, by, at). Covers receipts, issues, adjustments, deploy-to-asset and counts.
 5. **Generic audit log** (new): who did what, when, on which record, with before/after. Needed for ISO 9001 (procurement) and replaces ad-hoc logs where sensible. Keep `asset_activity_logs` as the asset timeline.
-6. **Warranty/AMC**: see `06-new-modules.md` (contracts table, reminder settings).
-7. **Procurement tables**: see `06-new-modules.md`.
-8. **Assistant**: `assistant_conversations`, `assistant_messages`, `assistant_actions` (proposed / confirmed / rejected, with payload and result).
+6. **Departments become a hierarchy** (owner, 17-11-2026; built in Phase 2):
+   - `departments` adds `parent_id` (a department can sit under another; cycles refused by a trigger) and `active`. `head_user_id` must be an active member of the organisation and not a support login.
+   - `memberships.department_id` replaces `profiles.department` (one department per person in each organisation).
+   - `approval_delegations` (from_user, to_user, starts_on, ends_on, reason) covers an approver on leave.
+   - "Head of department" comes from the department, not from a role. See `06-new-modules.md` §B, "Approvals and hierarchy".
+7. **Warranty/AMC**: see `06-new-modules.md` (contracts table, reminder settings).
+8. **Procurement tables**: see `06-new-modules.md`.
+9. **Assistant**: `assistant_conversations`, `assistant_messages`, `assistant_actions` (proposed / confirmed / rejected, with payload and result).
