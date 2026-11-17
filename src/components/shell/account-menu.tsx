@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { Check, Copy, KeyRound, LifeBuoy, LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { Check, Copy, KeyRound, LifeBuoy, LogOut, Monitor, Moon, Sun, Volume2 } from "lucide-react";
 import { signOut } from "@/app/(auth)/sign-in/actions";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { ThemePreference } from "@/lib/theme";
 import { Avatar } from "./avatar";
+import { useSoundPreference } from "./use-sound";
 import { useTheme } from "./use-theme";
 
 const SUPPORT_EMAIL = "support@assetnxg.app";
@@ -43,6 +45,7 @@ export type AccountSummary = {
 // sidebar card ("A product of HMS Digital Solutions / Contact for Support").
 export function AccountMenu({ account }: { account: AccountSummary }) {
   const { preference, setTheme } = useTheme();
+  const [soundOn, setSoundOn] = useSoundPreference();
   const [aboutOpen, setAboutOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
@@ -91,6 +94,16 @@ export function AccountMenu({ account }: { account: AccountSummary }) {
               <Monitor aria-hidden /> Same as this device
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuCheckboxItem
+            checked={soundOn}
+            onCheckedChange={(on) => setSoundOn(on === true)}
+            onSelect={(e) => e.preventDefault()}
+            className="min-h-8 gap-2.5 rounded-xs py-1.5 pr-8 pl-2 text-[13.5px]"
+          >
+            <Volume2 aria-hidden className="text-text-3" /> Sound for new alerts
+          </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator />
 
           <DropdownMenuItem onSelect={() => setPasswordOpen(true)}>

@@ -66,3 +66,29 @@ export function formatDate(
   const { year, month, day } = partsInZone(instant, timeZone);
   return `${day}-${month}-${year}`;
 }
+
+/** Clock time in the zone, 24-hour `HH:mm` (09:42). "" for null/undefined. */
+export function formatTime(
+  value: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIME_ZONE,
+): string {
+  if (value === null || value === undefined || value === "") return "";
+  const instant = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(instant.getTime())) {
+    throw new Error(`Not a date: ${String(value)}`);
+  }
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(instant);
+}
+
+/** The ISO calendar date one day before `iso` (YYYY-MM-DD in, out). */
+export function previousIsoDate(iso: string): string {
+  const m = ISO_DATE.exec(iso);
+  if (!m) throw new Error(`Not an ISO date: ${iso}`);
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) - 1));
+  return d.toISOString().slice(0, 10);
+}

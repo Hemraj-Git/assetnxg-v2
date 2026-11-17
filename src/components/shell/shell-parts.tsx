@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { getBrand, getOrgContext, isAdmin, type Brand } from "@/lib/auth";
+import { getBrand, getOrgContext, isAdmin, isConsoleRequest, type Brand } from "@/lib/auth";
 import { initials } from "@/lib/initials";
+import { loadBell } from "@/lib/notifications-server";
 import { roleSummary } from "@/lib/roles";
+import { createClient } from "@/lib/supabase/server";
 import { AccountMenu } from "./account-menu";
 import { Avatar } from "./avatar";
+import { CommandPalette } from "./command-palette";
+import { CreateMenu } from "./create-menu";
 import { ADMIN_HOME } from "./nav-config";
+import { NotificationBell } from "./notification-bell";
 import { SideNav } from "./side-nav";
 
 // Server parts of the shell. Each reads request data (host, session), so the
@@ -102,6 +107,30 @@ export async function SidebarMe() {
   );
 }
 
+/** Header right, before the account menu: search, Create, notifications.
+ *  Admins only (everyone else sees the gate notice). */
+export async function HeaderActions() {
+  const ctx = await getOrgContext();
+  if (ctx.status !== "ok" || !isAdmin(ctx.roles)) return null;
+
+  const supabase = await createClient({ orgId: ctx.brand.id });
+  const bell = await loadBell(supabase, ctx.brand.id, ctx.user.id);
+
+  return (
+    <>
+      <CommandPalette modules={ctx.modules} />
+      <CreateMenu modules={ctx.modules} />
+      <NotificationBell
+        userId={ctx.user.id}
+        orgId={ctx.brand.id}
+        timeZone={ctx.timeZone}
+        items={bell.items}
+        unread={bell.unread}
+      />
+    </>
+  );
+}
+
 /** Header right: the account menu. */
 export async function HeaderAccount() {
   const ctx = await getOrgContext();
@@ -134,6 +163,8 @@ export async function AdminGate({ children }: { children: ReactNode }) {
     case "signed-out":
       redirect("/sign-in?next=/admin");
     case "no-organisation":
+      // The console's address has no client: its home is the console.
+      if (await isConsoleRequest()) redirect("/console");
       return (
         <GateNotice title="This address is not linked to an organisation">
           Open AssetNXG at your organisation&apos;s address, for example{" "}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, todayIso, yearInZone } from "./dates";
+import { formatDate, formatTime, previousIsoDate, todayIso, yearInZone } from "./dates";
 
 // 18:30 UTC is midnight IST (UTC+05:30).
 const UTC_DEC_31_18_29 = new Date("2026-12-31T18:29:59Z"); // 23:59:59 IST, 31 Dec
@@ -53,5 +53,25 @@ describe("formatDate", () => {
 
   it("refuses garbage instead of printing 'Invalid Date'", () => {
     expect(() => formatDate("not a date")).toThrow(/Not a date/);
+  });
+});
+
+describe("formatTime", () => {
+  it("shows the IST clock time in 24-hour HH:mm", () => {
+    expect(formatTime(UTC_EARLY_MORNING)).toBe("01:30");
+    expect(formatTime("2026-11-17T09:12:00Z")).toBe("14:42");
+  });
+
+  it("is empty for empty values and refuses junk", () => {
+    expect(formatTime(null)).toBe("");
+    expect(() => formatTime("nope")).toThrow();
+  });
+});
+
+describe("previousIsoDate", () => {
+  it("steps back across month and year ends", () => {
+    expect(previousIsoDate("2026-11-17")).toBe("2026-11-16");
+    expect(previousIsoDate("2026-03-01")).toBe("2026-02-28");
+    expect(previousIsoDate("2027-01-01")).toBe("2026-12-31");
   });
 });

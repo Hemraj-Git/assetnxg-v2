@@ -46,6 +46,7 @@ AssetNXG is a facility and asset management system (CAFM / CMMS) sold to institu
   - Design tokens from the Claude Design canvas.
 - **Background work:** pg_cron + Supabase Edge Functions for reminders, overdue checks and auto check-out.
 - **Notifications:** an in-app table with Realtime, Web Push and email.
+  - Rows are written only by `private.notify()` (from triggers and cron); people may only mark their own read or dismissed.
 - **AI assistant:** `@anthropic-ai/sdk`, model `claude-opus-5-5`.
   - Tools run with the signed-in user's session, so RLS applies.
   - Write tools only propose; the user confirms.

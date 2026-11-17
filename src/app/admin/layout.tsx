@@ -5,6 +5,7 @@ import {
   BrandMark,
   BrandWide,
   HeaderAccount,
+  HeaderActions,
   ModuleNav,
   SidebarMe,
 } from "@/components/shell/shell-parts";
@@ -34,6 +35,11 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
       me={
         <Suspense fallback={<Skel className="mx-2 my-1.5 h-7 w-36 rail:w-7" />}>
           <SidebarMe />
+        </Suspense>
+      }
+      actions={
+        <Suspense fallback={<Skel className="h-[34px] w-[clamp(200px,24vw,340px)] max-lg:w-10" />}>
+          <HeaderActions />
         </Suspense>
       }
       account={

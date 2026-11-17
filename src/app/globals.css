@@ -239,6 +239,22 @@
   letter-spacing: -.01em;
 }
 
+/* Keyboard keys (canvas): Ctrl K, Esc, ↑ ↓. */
+@utility kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 5px;
+  border: 1px solid var(--color-border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+
 @utility eyebrow {
   font-size: 12px;
   line-height: 16px;

@@ -135,6 +135,69 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          organization_id: string
+          pushed_at: string | null
+          read_at: string | null
+          ref_id: string | null
+          ref_number: string | null
+          ref_table: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          organization_id: string
+          pushed_at?: string | null
+          read_at?: string | null
+          ref_id?: string | null
+          ref_number?: string | null
+          ref_table?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          organization_id?: string
+          pushed_at?: string | null
+          read_at?: string | null
+          ref_id?: string | null
+          ref_number?: string | null
+          ref_table?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_modules: {
         Row: {
           changed_at: string
@@ -417,6 +480,17 @@ export type Database = {
         | "director"
         | "security_supervisor"
         | "store_incharge"
+      notification_type:
+        | "wo_assigned"
+        | "inspection_assigned"
+        | "auto_checkout"
+        | "vendor_handover"
+        | "outside_repair_sent"
+        | "outside_repair_overdue"
+        | "request_resolved"
+        | "request_escalated"
+        | "request_closed"
+        | "due_today"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -568,6 +642,18 @@ export const Constants = {
         "director",
         "security_supervisor",
         "store_incharge",
+      ],
+      notification_type: [
+        "wo_assigned",
+        "inspection_assigned",
+        "auto_checkout",
+        "vendor_handover",
+        "outside_repair_sent",
+        "outside_repair_overdue",
+        "request_resolved",
+        "request_escalated",
+        "request_closed",
+        "due_today",
       ],
     },
   },

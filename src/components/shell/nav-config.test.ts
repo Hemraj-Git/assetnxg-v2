@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ALL_MODULES } from "@/lib/modules";
-import { NAV, breadcrumbsFor, findNavLeaf, isActive, navForModules, navSectionParams } from "./nav-config";
+import { NAV, breadcrumbsFor, destinationsFor, findNavLeaf, isActive, navForModules, navSectionParams } from "./nav-config";
 
 function labels(groups: ReturnType<typeof navForModules>): string[] {
   return groups.flatMap((g) => g.items.flatMap((i) => [i.label, ...(i.children ?? []).map((c) => c.label)]));
@@ -96,5 +96,22 @@ describe("findNavLeaf and navSectionParams", () => {
     for (const label of labels) {
       expect(label).not.toMatch(/[_]|^[a-z]/);
     }
+  });
+});
+
+describe("destinationsFor", () => {
+  it("lists only the pages this client has, with where they sit", () => {
+    const list = destinationsFor(["housekeeping"]);
+    const byHref = Object.fromEntries(list.map((d) => [d.href, d.trail]));
+    expect(byHref["/admin/work-orders/housekeeping"]).toBe("Operations › Work orders");
+    expect(byHref["/admin/work-orders"]).toBe("Operations");
+    expect(byHref["/admin/work-orders/preventive"]).toBeUndefined();
+    expect(byHref["/admin/inspections"]).toBeUndefined();
+    expect(byHref["/admin/assets"]).toBe("Assets");
+  });
+
+  it("with every module, has one entry per nav page", () => {
+    const pages = NAV.flatMap((g) => g.items.flatMap((i) => [i, ...(i.children ?? [])]));
+    expect(destinationsFor(ALL_MODULES)).toHaveLength(pages.length);
   });
 });

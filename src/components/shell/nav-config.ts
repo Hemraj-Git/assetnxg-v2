@@ -177,3 +177,31 @@ export function navSectionParams(): { section: string[] }[] {
   }
   return out;
 }
+
+export type Destination = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  /** Where it sits, for the search list: "Operations" or "Operations › Work orders". */
+  trail: string;
+};
+
+/** Every page this client has, flat, for the search (Ctrl K) list. Views
+ *  (Preventive…) carry their parent's icon. */
+export function destinationsFor(enabled: readonly AppModule[]): Destination[] {
+  const out: Destination[] = [];
+  for (const group of navForModules(enabled)) {
+    for (const item of group.items) {
+      out.push({ label: item.label, href: item.href, icon: item.icon, trail: group.label });
+      for (const child of item.children ?? []) {
+        out.push({
+          label: child.label,
+          href: child.href,
+          icon: item.icon,
+          trail: `${group.label} › ${item.label}`,
+        });
+      }
+    }
+  }
+  return out;
+}

@@ -19,6 +19,8 @@ type Slots = {
   nav: ReactNode;
   /** Signed-in person, sidebar footer. */
   me: ReactNode;
+  /** Header right, before the account: search, Create, notifications. */
+  actions?: ReactNode;
   /** Account menu, header right. */
   account: ReactNode;
   children: ReactNode;
@@ -28,7 +30,7 @@ type Slots = {
 //   ≥1280px   sidebar 248px, can be collapsed to the rail
 //   1024–1279 icon rail 64px
 //   <1024px   sidebar becomes a sheet behind the menu button
-export function AppShell({ brandWide, brandMark, nav, me, account, children }: Slots) {
+export function AppShell({ brandWide, brandMark, nav, me, actions, account, children }: Slots) {
   // Remembered per device; expanded on the server and until storage is read.
   const [collapsedFlag, setCollapsedFlag] = useLocalPreference(
     COLLAPSE_KEY,
@@ -108,6 +110,7 @@ export function AppShell({ brandWide, brandMark, nav, me, account, children }: S
           </Button>
           <Breadcrumbs />
           <span className="flex-1" />
+          {actions}
           {account}
         </header>
 
