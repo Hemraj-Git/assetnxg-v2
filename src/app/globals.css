@@ -1,0 +1,249 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* AssetNXG design system v1 — tokens from the Claude Design canvas
+   ("AssetNXG Admin Redesign", Phase 1 · Tokens and Type boards).
+   Names are Tailwind v4 theme variables: --color-surface → bg-surface,
+   --color-danger-ink → text-danger-ink. Dark values override the same names
+   under .dark. Contrast ratios are documented on the Tokens board (WCAG 2.2). */
+
+@custom-variant dark (&:is(.dark *));
+
+/* Sidebar icon rail (canvas · App shell): automatic at 1024–1279px, or when
+   the person collapses it at ≥1280px. Only inside the desktop sidebar, never
+   in the phone navigation sheet. */
+@custom-variant rail {
+  @media (width >= 64rem) and (width < 80rem) {
+    &:where([data-sidebar="desktop"], [data-sidebar="desktop"] *) {
+      @slot;
+    }
+  }
+  &:where([data-sidebar="desktop"][data-collapsed="true"], [data-sidebar="desktop"][data-collapsed="true"] *) {
+    @slot;
+  }
+}
+
+/* ───────────────────────── Light (default) ───────────────────────── */
+@theme {
+  /* neutrals */
+  --color-bg: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-raised: #FFFFFF;
+  --color-sunken: #EEF1F5;
+  --color-border: #DCE1E8;
+  --color-border-strong: #7A8597;
+  --color-text: #0F172A;
+  --color-text-2: #475569;
+  --color-text-3: #5F6B7E;
+  --color-scrim: rgba(15, 23, 42, .40);
+  --color-row-hover: #F3F5F8;
+  --color-skel: #E9EDF2;
+  --color-skel-hi: #F4F6F9;
+
+  /* primary: blue means "act" or "selected", nothing decorative */
+  --color-primary: #1D4ED8;
+  --color-primary-hover: #1A43BF;
+  --color-primary-pressed: #1E3A8A;
+  --color-primary-weak: #EAF0FE;
+  --color-primary-ink: #1D4ED8;
+  --color-on-primary: #FFFFFF;
+  --color-focus: #1D4ED8;
+  --color-focus-gap: #FFFFFF;
+
+  /* semantic: base / tint / ink */
+  --color-success: #15803D; --color-success-tint: #E7F4EB; --color-success-ink: #14532D;
+  --color-warning: #B45309; --color-warning-tint: #FCF1E3; --color-warning-ink: #7C2D12;
+  --color-danger: #B91C1C;  --color-danger-tint: #FCEBEB;  --color-danger-ink: #7F1D1D;
+  --color-danger-solid: #B91C1C; --color-danger-hover: #9F1717; --color-danger-pressed: #7F1D1D;
+  --color-info: #1D4ED8;   --color-info-tint: #EAF0FE;    --color-info-ink: #1E3A8A;
+  --color-housekeeping: #6D28D9; --color-housekeeping-tint: #F1ECFD; --color-housekeeping-ink: #4C1D95;
+  --color-inspection: #047857;   --color-inspection-tint: #E5F4EE;   --color-inspection-ink: #064E3B;
+  --color-guest: #0F766E;        --color-guest-tint: #E5F3F1;        --color-guest-ink: #134E4A;
+  --color-neutral: #5F6B7E;      --color-neutral-tint: #EEF1F5;      --color-neutral-ink: #334155;
+
+  /* charts: fixed order blue, amber, purple, green, slate */
+  --color-chart-1: #1D4ED8; --color-chart-2: #B45309; --color-chart-3: #6D28D9;
+  --color-chart-4: #047857; --color-chart-5: #7A8597;
+  --color-chart-grid: #E6EAF0; --color-chart-axis: #5F6B7E;
+
+  /* elevation (shadow-1/2/3) */
+  --shadow-1: 0 1px 2px rgba(15,23,42,.06), 0 2px 8px rgba(15,23,42,.06);
+  --shadow-2: 0 4px 12px rgba(15,23,42,.08), 0 12px 32px rgba(15,23,42,.10);
+  --shadow-3: 0 8px 24px rgba(15,23,42,.12), 0 24px 64px rgba(15,23,42,.18);
+
+  /* type: IBM Plex Sans; Plex Mono for record IDs only */
+  --font-sans: var(--font-plex-sans), "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-display: clamp(26px, 1.2vw + 16px, 32px);
+  --text-display--line-height: 1.25; --text-display--font-weight: 600; --text-display--letter-spacing: -.015em;
+  --text-page: clamp(20px, .6vw + 14px, 24px);
+  --text-page--line-height: 1.33; --text-page--font-weight: 600; --text-page--letter-spacing: -.01em;
+  --text-section: 18px; --text-section--line-height: 26px; --text-section--font-weight: 600;
+  --text-card: 15px;    --text-card--line-height: 22px;    --text-card--font-weight: 600;
+  --text-body: 14px;    --text-body--line-height: 22px;
+  --text-cell: 13px;    --text-cell--line-height: 20px;
+  --text-small: 13px;   --text-small--line-height: 20px;
+  --text-caption: 12px; --text-caption--line-height: 16px; --text-caption--font-weight: 500;
+  --text-mono: 12.5px;  --text-mono--line-height: 20px;    --text-mono--font-weight: 500; --text-mono--letter-spacing: -.01em;
+  --text-kpi: clamp(24px, .8vw + 16px, 30px);
+  --text-kpi--line-height: 1.15; --text-kpi--font-weight: 600; --text-kpi--letter-spacing: -.02em;
+
+  /* radius: 4 chips · 6 controls · 8 cards/dialogs · 12 bottom sheets only */
+  --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+
+  /* motion */
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, .2, 1);
+  --ease-exit: cubic-bezier(.4, 0, 1, 1);
+  --ease-emphasised: cubic-bezier(.05, .7, .1, 1);
+
+  /* shadcn/ui names → AssetNXG tokens, so generated components share the palette */
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text);
+  --color-popover: var(--color-raised);
+  --color-popover-foreground: var(--color-text);
+  --color-primary-foreground: var(--color-on-primary);
+  --color-secondary: var(--color-surface);
+  --color-secondary-foreground: var(--color-text);
+  --color-muted: var(--color-sunken);
+  --color-muted-foreground: var(--color-text-3);
+  --color-accent: var(--color-sunken);
+  --color-accent-foreground: var(--color-text);
+  --color-destructive: var(--color-danger-solid);
+  --color-input: var(--color-border-strong);
+  --color-ring: var(--color-focus);
+  --color-sidebar: var(--color-surface);
+  --color-sidebar-foreground: var(--color-text-2);
+  --color-sidebar-primary: var(--color-primary);
+  --color-sidebar-primary-foreground: var(--color-on-primary);
+  --color-sidebar-accent: var(--color-sunken);
+  --color-sidebar-accent-foreground: var(--color-text);
+  --color-sidebar-border: var(--color-border);
+  --color-sidebar-ring: var(--color-focus);
+}
+
+:root {
+  /* shadcn radius base (cards, dialogs) */
+  --radius: 8px;
+  --gutter: clamp(16px, 2vw, 32px);
+  /* z-index layers: use as z-(--z-drawer) */
+  --z-sticky: 10; --z-header: 20; --z-sidebar: 30; --z-drawer: 40; --z-scrim: 50;
+  --z-dialog: 60; --z-toast: 70; --z-palette: 80; --z-tooltip: 90;
+  /* durations: use as duration-(--dur-2) */
+  --dur-1: 100ms; --dur-2: 160ms; --dur-3: 240ms; --dur-4: 400ms; --dur-5: 700ms;
+  /* app shell */
+  --sidebar-w: 248px; --rail-w: 64px; --header-h: 56px;
+  color-scheme: light;
+}
+
+/* ───────────────────────── Dark: its own palette ─────────────────────────
+   Surfaces step lighter as they rise (bg → surface → raised); shadows are
+   secondary. Every pairing re-checked for contrast on the canvas. */
+.dark {
+  color-scheme: dark;
+  --color-bg: #0B0F19;
+  --color-surface: #121826;
+  --color-raised: #192133;
+  --color-sunken: #080B13;
+  --color-border: #263044;
+  --color-border-strong: #5C687D;
+  --color-text: #E6EAF2;
+  --color-text-2: #A7B1C2;
+  --color-text-3: #8691A5;
+  --color-scrim: rgba(3, 6, 12, .60);
+  --color-row-hover: #161E2E;
+  --color-skel: #1C2436;
+  --color-skel-hi: #232C40;
+
+  --color-primary: #2D5BE0;
+  --color-primary-hover: #3A68EC;
+  --color-primary-pressed: #1D4ED8;
+  --color-primary-weak: #17244A;
+  --color-primary-ink: #8EAEFF;
+  --color-on-primary: #FFFFFF;
+  --color-focus: #8EAEFF;
+  --color-focus-gap: #0B0F19;
+
+  --color-success: #3FA866; --color-success-tint: #10291B; --color-success-ink: #8FD9A8;
+  --color-warning: #D07A26; --color-warning-tint: #2D1F0D; --color-warning-ink: #F3BF7A;
+  --color-danger: #E05252;  --color-danger-tint: #331517;  --color-danger-ink: #F6A7A7;
+  /* solid danger buttons use a deeper fill so white text keeps 5:1 */
+  --color-danger-solid: #C93A3A; --color-danger-hover: #B32F2F; --color-danger-pressed: #7F1D1D;
+  --color-info: #6A8FF2;    --color-info-tint: #17244A;    --color-info-ink: #C7D6FF;
+  --color-housekeeping: #9D74EC; --color-housekeeping-tint: #241A3F; --color-housekeeping-ink: #CDB8FA;
+  --color-inspection: #2AA67F;   --color-inspection-tint: #0C2A21;   --color-inspection-ink: #86DBBD;
+  --color-guest: #27A398;        --color-guest-tint: #0C2826;        --color-guest-ink: #8AD8CF;
+  --color-neutral: #8691A5;      --color-neutral-tint: #1C2436;      --color-neutral-ink: #C4CCD9;
+
+  --color-chart-1: #6A8FF2; --color-chart-2: #D07A26; --color-chart-3: #9D74EC;
+  --color-chart-4: #2AA67F; --color-chart-5: #6B778C;
+  --color-chart-grid: #1F2839; --color-chart-axis: #8691A5;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-2: 0 8px 24px rgba(0,0,0,.45);
+  --shadow-3: 0 16px 48px rgba(0,0,0,.55);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-bg text-body text-text antialiased;
+    /* Tabular figures everywhere, so numbers line up in tables, KPIs, timers. */
+    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  /* lucide icons at 1.5px stroke (canvas · Icons) */
+  svg.lucide {
+    stroke-width: 1.5px;
+  }
+  a {
+    color: var(--color-primary-ink);
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+}
+
+/* Reduced motion: keep short fades, drop slides, scaling and draw-ins. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Record IDs (AST-0013, WO-PM-2026-0042): Plex Mono, never for prose. */
+@utility id {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  line-height: var(--text-mono--line-height);
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+
+@utility eyebrow {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
