@@ -22,9 +22,16 @@ function authAdmin() {
 export type InviteResult = { ok: true } | { ok: false; reason: "exists" | "failed"; message: string };
 
 /** Sends Supabase's invite email. `redirectTo` must be in Auth › URL
- *  Configuration › Redirect URLs (e.g. http://*.localhost:3000/**). */
-export async function sendInvite(email: string, redirectTo: string): Promise<InviteResult> {
-  const { error } = await authAdmin().inviteUserByEmail(email, { redirectTo });
+ *  Configuration › Redirect URLs (e.g. http://*.localhost:3000/**).
+ *  `profile` fills the new account's name and phone (private.handle_new_user
+ *  reads them; roles are never taken from it). Sending again to someone who
+ *  hasn't accepted yet re-sends the invite. */
+export async function sendInvite(
+  email: string,
+  redirectTo: string,
+  profile?: { full_name?: string; phone?: string },
+): Promise<InviteResult> {
+  const { error } = await authAdmin().inviteUserByEmail(email, { redirectTo, data: profile });
   if (!error) return { ok: true };
   if (error.code === "email_exists" || /already.*registered/i.test(error.message)) {
     return { ok: false, reason: "exists", message: error.message };

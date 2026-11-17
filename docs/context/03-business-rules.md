@@ -175,6 +175,8 @@ A work order is overdue when its due date is past and it is not Completed or Can
 - **Storage:** no public write; uploads by signed-in users only, owner-scoped select and update (0030, 0031); no deletes through the API.
 - **Trigger-only functions** are not callable through the API (0032).
 - **Department head** is a registered user. Deleting that user clears the link.
+  - v2: the head is a staff member of the same client (not a guest or support login); departments nest (`parent_id`, no loops); a department with people or sub-departments can't be deleted.
+- **v2: a client always keeps one ordinary Admin**, and nobody removes themselves from a client (database triggers).
 - **Support logins** (`@assetnxg.app`) are hidden from every client-facing list (0057 touches this too).
 
 ## 12. Notifications and push

@@ -156,6 +156,14 @@ export async function requireMember() {
   return { ctx, supabase };
 }
 
+/** As requireMember, for desk pages and actions that only Admins use. The
+ *  database checks the Admin role again on every row. */
+export async function requireAdmin() {
+  const member = await requireMember();
+  if (!isAdmin(member.ctx.roles)) notFound();
+  return member;
+}
+
 /** As requireMember, and the client must have the module switched on. */
 export async function requireModule(required: ModuleRequirement) {
   const member = await requireMember();

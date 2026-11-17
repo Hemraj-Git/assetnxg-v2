@@ -90,9 +90,68 @@ export type Database = {
           },
         ]
       }
+      departments: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          head_user_id: string | null
+          id: string
+          name: string
+          organization_id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          head_user_id?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          head_user_id?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_head_user_id_fkey"
+            columns: ["head_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_organization_id_parent_id_fkey"
+            columns: ["organization_id", "parent_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
+          department_id: string | null
           id: string
           organization_id: string
           roles: Database["public"]["Enums"]["app_role"][]
@@ -102,6 +161,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          department_id?: string | null
           id?: string
           organization_id: string
           roles: Database["public"]["Enums"]["app_role"][]
@@ -111,6 +171,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          department_id?: string | null
           id?: string
           organization_id?: string
           roles?: Database["public"]["Enums"]["app_role"][]
@@ -119,6 +180,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "memberships_department_fk"
+            columns: ["organization_id", "department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["organization_id", "id"]
+          },
           {
             foreignKeyName: "memberships_organization_id_fkey"
             columns: ["organization_id"]
@@ -333,6 +401,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string | null
+          first_signed_in_at: string | null
           full_name: string | null
           id: string
           is_support: boolean | null
@@ -342,6 +411,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string | null
+          first_signed_in_at?: string | null
           full_name?: string | null
           id: string
           is_support?: boolean | null
@@ -351,6 +421,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string | null
+          first_signed_in_at?: string | null
           full_name?: string | null
           id?: string
           is_support?: boolean | null
@@ -364,6 +435,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      org_add_member: {
+        Args: {
+          p_department?: string
+          p_email: string
+          p_org: string
+          p_roles: Database["public"]["Enums"]["app_role"][]
+        }
+        Returns: string
+      }
       org_brand: {
         Args: { org_slug: string }
         Returns: {
@@ -480,6 +560,8 @@ export type Database = {
         | "director"
         | "security_supervisor"
         | "store_incharge"
+        | "dean"
+        | "quality_manager"
       notification_type:
         | "wo_assigned"
         | "inspection_assigned"
@@ -642,6 +724,8 @@ export const Constants = {
         "director",
         "security_supervisor",
         "store_incharge",
+        "dean",
+        "quality_manager",
       ],
       notification_type: [
         "wo_assigned",

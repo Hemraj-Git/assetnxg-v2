@@ -32,6 +32,9 @@ export type NavLeaf = {
   phase: 1 | 2 | 3 | 4 | 5;
   /** Module(s) the client needs switched on; none = core, always shown. */
   module?: ModuleRequirement;
+  /** The page has its own route, so the "arrives in phase N" placeholder
+   *  doesn't generate it. */
+  built?: true;
 };
 
 export type NavItem = NavLeaf & {
@@ -90,7 +93,7 @@ export const NAV: NavGroup[] = [
       // Templates serve preventive jobs and inspections.
       { label: "Checklist templates", href: "/admin/templates", icon: ListChecks, phase: 2, module: ["maintenance", "inspections"] },
       { label: "Vendors", href: "/admin/vendors", icon: Building2, phase: 2 },
-      { label: "People & departments", href: "/admin/people", icon: Users, phase: 2 },
+      { label: "People & departments", href: "/admin/people", icon: Users, phase: 2, built: true },
     ],
   },
 ];
@@ -164,13 +167,14 @@ export function findNavLeaf(pathname: string): NavLeaf | null {
   return null;
 }
 
-/** Every admin path in the nav except the dashboard, as path segments. */
+/** Every admin path in the nav for the placeholder page: not the dashboard,
+ *  not pages that have their own route. As path segments. */
 export function navSectionParams(): { section: string[] }[] {
   const out: { section: string[] }[] = [];
   for (const group of NAV) {
     for (const item of group.items) {
       for (const leaf of [item, ...(item.children ?? [])]) {
-        if (leaf.href === ADMIN_HOME) continue;
+        if (leaf.href === ADMIN_HOME || leaf.built) continue;
         out.push({ section: leaf.href.replace(`${ADMIN_HOME}/`, "").split("/") });
       }
     }
