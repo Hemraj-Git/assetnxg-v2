@@ -26,6 +26,9 @@ export default function ConsoleLayout({ children }: LayoutProps<"/console">) {
           <Link href="/console" className="rounded-sm px-2 py-1 text-[13.5px] font-medium text-text-2 no-underline hover:bg-sunken hover:text-text">
             Clients
           </Link>
+          <Link href="/console/patterns" className="rounded-sm px-2 py-1 text-[13.5px] font-medium text-text-2 no-underline hover:bg-sunken hover:text-text">
+            Patterns
+          </Link>
         </nav>
         <span className="flex-1" />
         <Suspense fallback={<span aria-hidden className="block size-7 animate-pulse rounded-full bg-skel" />}>

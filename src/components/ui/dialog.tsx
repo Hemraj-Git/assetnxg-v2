@@ -47,13 +47,28 @@ function DialogOverlay({
   )
 }
 
+// Canvas · Drawer and dialog › Dialog: sm 400 · md 560 · lg 800. With a size,
+// the dialog follows the full rules: max 85% of the screen height with the
+// body scrolling and the footer staying put, and below 640px it becomes a
+// bottom sheet (top corners rounded, 44px buttons).
+const DIALOG_SIZE = {
+  sm: "sm:max-w-[400px]",
+  md: "sm:max-w-[560px]",
+  lg: "sm:max-w-[800px]",
+} as const
+
+const SHEET_ON_PHONES =
+  "max-h-[85dvh] overflow-y-auto max-sm:top-auto max-sm:bottom-0 max-sm:max-h-[calc(100dvh-24px)] max-sm:max-w-full max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-lg max-sm:data-open:slide-in-from-bottom-10 max-sm:data-open:zoom-in-100 max-sm:[&_[data-slot=dialog-footer]_button]:h-11"
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  size,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  size?: keyof typeof DIALOG_SIZE
 }) {
   return (
     <DialogPortal>
@@ -62,6 +77,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-md border border-border bg-popover p-6 text-body text-popover-foreground shadow-3 duration-(--dur-3) outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-98 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98",
+          size && cn(DIALOG_SIZE[size], SHEET_ON_PHONES),
           className
         )}
         {...props}
@@ -107,7 +123,9 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-6 -mb-6 flex flex-col-reverse gap-2 rounded-b-md border-t bg-raised px-6 py-3 sm:flex-row sm:justify-end",
+        // Cancel left, the action right, always (canvas). Stays in view
+        // while a long body scrolls.
+        "sticky -bottom-6 -mx-6 -mb-6 flex flex-row gap-2 rounded-b-md border-t bg-raised px-6 py-3 *:max-sm:flex-1 sm:justify-end sm:[&>:first-child:not(:only-child)]:mr-auto",
         className
       )}
       {...props}

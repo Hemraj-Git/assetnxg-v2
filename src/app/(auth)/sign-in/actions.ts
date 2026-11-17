@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { isConsoleRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/safe-next-path";
 
@@ -9,7 +10,8 @@ export type SignInState = { error: string | null; email: string };
 export async function signIn(_prev: SignInState, formData: FormData): Promise<SignInState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = safeNextPath(formData.get("next"));
+  // Without a usable ?next=, home is the console on its address, else /admin.
+  const next = safeNextPath(formData.get("next"), (await isConsoleRequest()) ? "/console" : "/admin");
 
   if (!email || !password) {
     return { error: "Enter your email and password.", email };
