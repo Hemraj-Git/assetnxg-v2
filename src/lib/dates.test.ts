@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatTime, previousIsoDate, todayIso, yearInZone } from "./dates";
+import { daysBetween, formatDate, formatTime, parseDisplayDate, previousIsoDate, todayIso, yearInZone } from "./dates";
 
 // 18:30 UTC is midnight IST (UTC+05:30).
 const UTC_DEC_31_18_29 = new Date("2026-12-31T18:29:59Z"); // 23:59:59 IST, 31 Dec
@@ -73,5 +73,30 @@ describe("previousIsoDate", () => {
     expect(previousIsoDate("2026-11-17")).toBe("2026-11-16");
     expect(previousIsoDate("2026-03-01")).toBe("2026-02-28");
     expect(previousIsoDate("2027-01-01")).toBe("2026-12-31");
+  });
+});
+
+describe("parseDisplayDate", () => {
+  it("reads DD-MM-YYYY and the usual separators", () => {
+    expect(parseDisplayDate("18-11-2026")).toBe("2026-11-18");
+    expect(parseDisplayDate(" 8/3/2027 ")).toBe("2027-03-08");
+    expect(parseDisplayDate("01.01.2027")).toBe("2027-01-01");
+  });
+
+  it("refuses dates that don't exist and other shapes", () => {
+    expect(parseDisplayDate("31-02-2026")).toBeNull();
+    expect(parseDisplayDate("29-02-2026")).toBeNull();
+    expect(parseDisplayDate("29-02-2028")).toBe("2028-02-29");
+    expect(parseDisplayDate("00-01-2026")).toBeNull();
+    expect(parseDisplayDate("2026-11-18")).toBeNull();
+    expect(parseDisplayDate("")).toBeNull();
+  });
+});
+
+describe("daysBetween", () => {
+  it("counts calendar days, across months and years", () => {
+    expect(daysBetween("2026-11-18", "2026-11-25")).toBe(7);
+    expect(daysBetween("2026-12-31", "2027-01-01")).toBe(1);
+    expect(daysBetween("2026-11-18", "2026-11-17")).toBe(-1);
   });
 });

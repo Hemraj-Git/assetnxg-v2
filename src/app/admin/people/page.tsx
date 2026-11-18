@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "People" };
 // Staff of this organisation: invite, roles, department, remove (02 People).
 export default async function PeoplePage({ searchParams }: PageProps<"/admin/people">) {
   const { ctx, supabase } = await requireAdmin();
-  const { people, departments } = await loadPeopleAndDepartments(supabase, ctx.brand.id, ctx.user.id);
+  const { people, departments } = await loadPeopleAndDepartments(supabase, ctx.brand.id, ctx.user.id, ctx.timeZone);
 
   const params = parseTableParams(await searchParams, PEOPLE_TABLE);
   const result = applyTableParams(people, params, { searchText: personSearchText, sortValue: personSortValue });
@@ -35,6 +35,10 @@ export default async function PeoplePage({ searchParams }: PageProps<"/admin/peo
         departments={departmentTree(departments).map((d) => ({ id: d.id, path: d.path }))}
         roleGroups={roleGroupsFor(ctx.modules)}
         timeZone={ctx.timeZone}
+        staff={people
+          .map((p) => ({ userId: p.userId, name: p.name, email: p.email }))
+          .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }))}
+        hasDirector={people.some((p) => p.roles.includes("director"))}
       />
     </PageBody>
   );

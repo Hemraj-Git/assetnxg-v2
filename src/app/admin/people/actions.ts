@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
+import { daysBetween, parseDisplayDate, todayIso } from "@/lib/dates";
 import { plainDbError } from "@/lib/db-errors";
 import { parseAssignableRoles, roleGroupsFor } from "@/lib/roles";
 import { requestOrigin } from "@/lib/request-origin";
@@ -179,6 +180,57 @@ export async function resendInvite(userId: string): Promise<ActionState> {
     );
   }
   return ok(`Invite sent again to ${profile.email}.`);
+}
+
+// ───────────── Stand-ins (approvers on leave) ─────────────
+
+/** Someone approves in this person's place between two dates (06 §B). */
+export async function addStandIn(fromUserId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { ctx, supabase } = await requireAdmin();
+  const toUserId = text(formData, "to_user_id");
+  if (!z.uuid().safeParse(fromUserId).success) return fail(TRY_AGAIN);
+  if (!z.uuid().safeParse(toUserId).success) return fail("Choose who stands in.");
+
+  const startsOn = parseDisplayDate(text(formData, "starts_on"));
+  const endsOn = parseDisplayDate(text(formData, "ends_on"));
+  if (!startsOn) return fail("Enter the first day as DD-MM-YYYY.");
+  if (!endsOn) return fail("Enter the last day as DD-MM-YYYY.");
+  if (daysBetween(startsOn, endsOn) < 0) return fail("The last day is before the first day.");
+  if (daysBetween(startsOn, endsOn) > 366) return fail("A stand-in can cover up to a year. Choose a shorter period.");
+  if (daysBetween(todayIso(ctx.timeZone), endsOn) < 0) return fail("The last day has already passed.");
+
+  const reason = text(formData, "reason");
+  if (reason.length > 200) return fail("Keep the reason under 200 characters.");
+
+  const { error } = await supabase.from("approval_delegations").insert({
+    organization_id: ctx.brand.id,
+    from_user_id: fromUserId,
+    to_user_id: toUserId,
+    starts_on: startsOn,
+    ends_on: endsOn,
+    reason: reason || null,
+  });
+  if (error) return fail(plainDbError(error, TRY_AGAIN));
+
+  refresh();
+  return ok("Stand-in added.");
+}
+
+export async function removeStandIn(id: string): Promise<ActionState> {
+  const { ctx, supabase } = await requireAdmin();
+  if (!z.uuid().safeParse(id).success) return fail(TRY_AGAIN);
+
+  const { data, error } = await supabase
+    .from("approval_delegations")
+    .delete()
+    .eq("id", id)
+    .eq("organization_id", ctx.brand.id)
+    .select("id");
+  if (error) return fail(plainDbError(error, TRY_AGAIN));
+  if (!data?.length) return fail("This stand-in no longer exists. Refresh the page.");
+
+  refresh();
+  return ok("Stand-in removed.");
 }
 
 // ───────────── Departments ─────────────

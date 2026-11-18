@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CircleCheck, Clock, Eye, Mail, Pencil, UserMinus, UserPlus, Users } from "lucide-react";
+import { CalendarClock, CircleCheck, Clock, Eye, Mail, Pencil, TriangleAlert, UserMinus, UserPlus, Users, X } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import { TableMessage } from "@/components/data-table/table-message";
 import { Avatar } from "@/components/shell/avatar";
@@ -31,15 +31,18 @@ import { formatDate } from "@/lib/dates";
 import { ROLE_LABELS, roleSummary, type RoleGroup } from "@/lib/roles";
 import type { TableParams } from "@/lib/table-params";
 import {
+  addStandIn,
   invitePerson,
   removePerson,
+  removeStandIn,
   resendInvite,
   updatePerson,
   type ActionState,
 } from "./actions";
-import { PEOPLE_TABLE, type PersonRow } from "./people-table";
+import { PEOPLE_TABLE, type PersonRow, type StandIn } from "./people-table";
 
 type DepartmentOption = { id: string; path: string };
+type StaffOption = { userId: string; name: string; email: string };
 
 const initial: ActionState = { error: null, success: null };
 
@@ -63,6 +66,8 @@ export function PeopleView({
   departments,
   roleGroups,
   timeZone,
+  staff,
+  hasDirector,
 }: {
   rows: PersonRow[];
   total: number;
@@ -72,11 +77,16 @@ export function PeopleView({
   departments: DepartmentOption[];
   roleGroups: RoleGroup[];
   timeZone: string;
+  /** Everyone on the staff (all pages), for the stand-in picker. */
+  staff: StaffOption[];
+  /** Someone holds the Director / Principal role (the top of the hierarchy). */
+  hasDirector: boolean;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [removeId, setRemoveId] = useState<string | null>(null);
+  const [standInFor, setStandInFor] = useState<PersonRow | null>(null);
   const [notice, setNotice] = useState<ActionState>(initial);
   const [busy, startTransition] = useTransition();
 
@@ -261,6 +271,16 @@ export function PeopleView({
                   ]}
                 />
               </DrawerSection>
+              <DrawerSection title="Approvals">
+                <ApprovalFacts
+                  person={open}
+                  hasDirector={hasDirector}
+                  timeZone={timeZone}
+                  busy={busy}
+                  onAdd={() => setStandInFor(open)}
+                  onRemove={(id) => run(() => removeStandIn(id))}
+                />
+              </DrawerSection>
               <p className="text-small text-text-3">
                 Name and phone are changed by the person, from their account menu.
               </p>
@@ -296,6 +316,18 @@ export function PeopleView({
           onOpenChange={(o) => !o && setEditId(null)}
           onDone={(message) => {
             setEditId(null);
+            setNotice({ error: null, success: message });
+          }}
+        />
+      )}
+
+      {standInFor && (
+        <StandInDialog
+          person={standInFor}
+          staff={staff.filter((p) => p.userId !== standInFor.userId)}
+          onOpenChange={(o) => !o && setStandInFor(null)}
+          onDone={(message) => {
+            setStandInFor(null);
             setNotice({ error: null, success: message });
           }}
         />
@@ -433,6 +465,154 @@ function EditDialog({
             </Button>
             <Button type="submit" loading={pending}>
               Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ───────────── Approvals ─────────────
+
+function StandInLine({ s, timeZone }: { s: StandIn; timeZone: string }) {
+  return (
+    <span className="flex min-w-0 flex-col">
+      <span>
+        <span className="font-medium">{s.otherName}</span>, {formatDate(s.startsOn, timeZone)} to{" "}
+        {formatDate(s.endsOn, timeZone)}
+        {s.activeToday && <span className="text-text-3"> (now)</span>}
+      </span>
+      {s.reason && <span className="text-small text-text-3">{s.reason}</span>}
+    </span>
+  );
+}
+
+function ApprovalFacts({
+  person,
+  hasDirector,
+  timeZone,
+  busy,
+  onAdd,
+  onRemove,
+}: {
+  person: PersonRow;
+  hasDirector: boolean;
+  timeZone: string;
+  busy: boolean;
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+}) {
+  const approval = person.approval;
+  return (
+    <div className="flex flex-col gap-4 text-cell">
+      <div className="flex flex-col gap-1">
+        <span className="text-small text-text-3">Their requisitions go first to</span>
+        <span>{approval ? approval.note : "—"}</span>
+        {approval?.toDirectorRole && !hasDirector && (
+          <span className="flex items-start gap-1.5 text-small text-warning-ink">
+            <TriangleAlert aria-hidden className="mt-0.5 size-3.5 flex-none" />
+            No one has the Director / Principal role yet. Give it to someone, or set a head for their department.
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-small text-text-3">Stand-ins while they are away</span>
+        {person.standIns.length === 0 ? (
+          <span className="text-text-2">None</span>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {person.standIns.map((s) => (
+              <li key={s.id} className="flex items-start justify-between gap-2">
+                <StandInLine s={s} timeZone={timeZone} />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={"Remove stand-in " + s.otherName}
+                  disabled={busy}
+                  onClick={() => onRemove(s.id)}
+                >
+                  <X aria-hidden />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div>
+          <Button variant="secondary" size="sm" onClick={onAdd}>
+            <CalendarClock aria-hidden /> Add a stand-in
+          </Button>
+        </div>
+      </div>
+
+      {person.standingInFor.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <span className="text-small text-text-3">They stand in for</span>
+          <ul className="flex flex-col gap-2">
+            {person.standingInFor.map((s) => (
+              <li key={s.id}>
+                <StandInLine s={s} timeZone={timeZone} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StandInDialog({
+  person,
+  staff,
+  onOpenChange,
+  onDone,
+}: {
+  person: PersonRow;
+  staff: StaffOption[];
+  onOpenChange: (open: boolean) => void;
+  onDone: (message: string) => void;
+}) {
+  const [state, action, pending] = useActionState(async (prev: ActionState, formData: FormData) => {
+    const result = await addStandIn(person.userId, prev, formData);
+    if (result.success) onDone(result.success);
+    return result;
+  }, initial);
+
+  return (
+    <Dialog open onOpenChange={(o) => !pending && onOpenChange(o)}>
+      <DialogContent size="md">
+        <form action={action} noValidate className="contents">
+          <DialogHeader>
+            <DialogTitle className="text-card">Stand-in for {person.name}</DialogTitle>
+            <DialogDescription>
+              Between these dates, approvals that would go to {person.name} go to the stand-in instead. A
+              stand-in never approves their own requisitions, and a head&apos;s own requisitions still go up.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <SelectField
+              label="Stand-in"
+              name="to_user_id"
+              defaultValue=""
+              options={[
+                { value: "", label: "Choose a person" },
+                ...staff.map((p) => ({ value: p.userId, label: p.name + " · " + p.email })),
+              ]}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField label="First day" name="starts_on" placeholder="DD-MM-YYYY" inputMode="numeric" autoComplete="off" />
+              <TextField label="Last day" name="ends_on" placeholder="DD-MM-YYYY" inputMode="numeric" autoComplete="off" />
+            </div>
+            <TextField label="Reason" name="reason" optional maxLength={200} placeholder="e.g. On leave" />
+            {state.error && <FormMessage tone="error">{state.error}</FormMessage>}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={pending}>
+              Add stand-in
             </Button>
           </DialogFooter>
         </form>

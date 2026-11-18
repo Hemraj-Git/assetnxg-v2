@@ -16,6 +16,9 @@ const base: PersonRow = {
   addedAt: "2026-11-01T05:00:00Z",
   firstSignedInAt: "2026-11-02T05:00:00Z",
   isMe: false,
+  approval: null,
+  standIns: [],
+  standingInFor: [],
 };
 
 const people: PersonRow[] = [

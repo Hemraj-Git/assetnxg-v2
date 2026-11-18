@@ -92,3 +92,28 @@ export function previousIsoDate(iso: string): string {
   const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) - 1));
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * Reads a date typed on screen as DD-MM-YYYY (also DD/MM/YYYY or DD.MM.YYYY,
+ * one-digit day or month allowed) and returns ISO `YYYY-MM-DD`, or null when
+ * it isn't a real calendar date (31-02-2026, 00-01-2026…).
+ */
+export function parseDisplayDate(input: string): string | null {
+  const m = /^\s*(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})\s*$/.exec(input);
+  if (!m) return null;
+  const [day, month, year] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (year < 1900 || year > 2999 || month < 1 || month > 12 || day < 1) return null;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (day > daysInMonth) return null;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/** Whole days from ISO date `a` to ISO date `b` (negative when b is earlier). */
+export function daysBetween(a: string, b: string): number {
+  const toUtc = (iso: string) => {
+    const m = ISO_DATE.exec(iso);
+    if (!m) throw new Error(`Not an ISO date: ${iso}`);
+    return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  };
+  return Math.round((toUtc(b) - toUtc(a)) / 86_400_000);
+}

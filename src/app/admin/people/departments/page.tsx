@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Departments" };
 // the requester's head, then up the tree).
 export default async function DepartmentsPage() {
   const { ctx, supabase } = await requireAdmin();
-  const { people, departments } = await loadPeopleAndDepartments(supabase, ctx.brand.id, ctx.user.id);
+  const { people, departments } = await loadPeopleAndDepartments(supabase, ctx.brand.id, ctx.user.id, ctx.timeZone);
 
   return (
     <PageBody>

@@ -24,6 +24,30 @@ export type PersonRow = {
   addedAt: string;
   firstSignedInAt: string | null;
   isMe: boolean;
+  /** Where this person's requisitions go today (Head of Department step). */
+  approval: Approval | null;
+  /** Stand-ins covering this person, today or later. */
+  standIns: StandIn[];
+  /** People this person stands in for, today or later. */
+  standingInFor: StandIn[];
+};
+
+export type Approval = {
+  /** A person, or null when it goes to the Director / Principal role. */
+  approverName: string | null;
+  toDirectorRole: boolean;
+  /** Plain sentence from the database, e.g. "Asha Rao, head of Academics". */
+  note: string;
+};
+
+export type StandIn = {
+  id: string;
+  /** The other person: the stand-in, or the person stood in for. */
+  otherName: string;
+  startsOn: string;
+  endsOn: string;
+  reason: string | null;
+  activeToday: boolean;
 };
 
 export type DepartmentRow = {

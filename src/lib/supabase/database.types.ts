@@ -17,6 +17,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      approval_delegations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ends_on: string
+          from_user_id: string
+          id: string
+          organization_id: string
+          reason: string | null
+          starts_on: string
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ends_on: string
+          from_user_id: string
+          id?: string
+          organization_id: string
+          reason?: string | null
+          starts_on: string
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string
+          from_user_id?: string
+          id?: string
+          organization_id?: string
+          reason?: string | null
+          starts_on?: string
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_delegations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_delegations_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_delegations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_delegations_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -443,6 +508,16 @@ export type Database = {
           p_roles: Database["public"]["Enums"]["app_role"][]
         }
         Returns: string
+      }
+      org_approver_map: {
+        Args: { p_org: string }
+        Returns: {
+          approver_role: Database["public"]["Enums"]["app_role"]
+          approver_user_id: string
+          note: string
+          on_behalf_of: string
+          user_id: string
+        }[]
       }
       org_brand: {
         Args: { org_slug: string }

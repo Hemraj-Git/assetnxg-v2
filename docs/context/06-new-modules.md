@@ -80,7 +80,7 @@ Roles are per membership and combinable.
 - `approval_delegations` (from, to, start and end dates in IST, reason) covers an approver on leave.
 - `private.resolve_department_approver(dept, requester)`:
   1. Walk up from the requester's department to the first head who is set, active and not the requester.
-  2. Use their delegate if one is active today.
+  2. Use their delegate if one is active today, unless the delegate is the requester. A head's own requisition always goes up, even while someone stands in for them (built 18-11-2026; tests in `supabase/tests/approval_hierarchy.sql`).
   3. Past the top, go to the `director` role.
   4. Record a plain note, e.g. "Sent to the head of Academics because the requester heads Marine Engineering".
 
