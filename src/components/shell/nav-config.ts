@@ -89,7 +89,7 @@ export const NAV: NavGroup[] = [
     label: "Setup",
     items: [
       { label: "Locations", href: "/admin/locations", icon: MapPin, phase: 2, built: true },
-      { label: "Categories", href: "/admin/categories", icon: Tag, phase: 2 },
+      { label: "Categories", href: "/admin/categories", icon: Tag, phase: 2, built: true },
       // Templates serve preventive jobs and inspections.
       { label: "Checklist templates", href: "/admin/templates", icon: ListChecks, phase: 2, module: ["maintenance", "inspections"] },
       { label: "Vendors", href: "/admin/vendors", icon: Building2, phase: 2 },

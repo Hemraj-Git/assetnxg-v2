@@ -212,6 +212,44 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       counters: {
         Row: {
           kind: string
@@ -693,6 +731,60 @@ export type Database = {
           },
         ]
       }
+      sub_categories: {
+        Row: {
+          asset_fields: Json
+          category_id: string
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          sla_priority: Database["public"]["Enums"]["sla_priority"] | null
+          updated_at: string
+        }
+        Insert: {
+          asset_fields?: Json
+          category_id: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          updated_at?: string
+        }
+        Update: {
+          asset_fields?: Json
+          category_id?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_categories_organization_id_category_id_fkey"
+            columns: ["organization_id", "category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "sub_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -847,6 +939,7 @@ export type Database = {
         | "request_closed"
         | "due_today"
       room_status: "available" | "under_maintenance"
+      sla_priority: "critical" | "high" | "medium" | "low"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1014,6 +1107,7 @@ export const Constants = {
         "due_today",
       ],
       room_status: ["available", "under_maintenance"],
+      sla_priority: ["critical", "high", "medium", "low"],
     },
   },
 } as const
