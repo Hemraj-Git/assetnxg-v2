@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, formatDate, formatTime, parseDisplayDate, previousIsoDate, todayIso, yearInZone } from "./dates";
+import { addDays, daysBetween, formatDate, formatTime, parseDisplayDate, previousIsoDate, todayIso, yearInZone } from "./dates";
 
 // 18:30 UTC is midnight IST (UTC+05:30).
 const UTC_DEC_31_18_29 = new Date("2026-12-31T18:29:59Z"); // 23:59:59 IST, 31 Dec
@@ -98,5 +98,15 @@ describe("daysBetween", () => {
     expect(daysBetween("2026-11-18", "2026-11-25")).toBe(7);
     expect(daysBetween("2026-12-31", "2027-01-01")).toBe(1);
     expect(daysBetween("2026-11-18", "2026-11-17")).toBe(-1);
+  });
+});
+
+describe("addDays", () => {
+  it("moves across months, years and leap days", () => {
+    expect(addDays("2027-03-31", 1)).toBe("2027-04-01");
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addDays("2028-02-28", 1)).toBe("2028-02-29");
+    expect(addDays("2027-04-01", 364)).toBe("2028-03-30");
+    expect(addDays("2026-01-01", -1)).toBe("2025-12-31");
   });
 });

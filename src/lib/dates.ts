@@ -117,3 +117,11 @@ export function daysBetween(a: string, b: string): number {
   };
   return Math.round((toUtc(b) - toUtc(a)) / 86_400_000);
 }
+
+/** ISO date `iso` plus `days` calendar days (negative goes back). */
+export function addDays(iso: string, days: number): string {
+  const m = ISO_DATE.exec(iso);
+  if (!m) throw new Error(`Not an ISO date: ${iso}`);
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + days));
+  return d.toISOString().slice(0, 10);
+}

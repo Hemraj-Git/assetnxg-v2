@@ -12,6 +12,7 @@ const base: VendorRow = {
   phone: "+91 98765 43210",
   email: "sales@coolair.in",
   address: null,
+  contracts: [],
 };
 
 const vendors: VendorRow[] = [

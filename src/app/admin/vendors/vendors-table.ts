@@ -1,4 +1,14 @@
+import type { ContractKind, ContractState } from "@/lib/contracts";
 import type { TableDefaults } from "@/lib/table-params";
+
+export type VendorContract = {
+  code: string;
+  kind: ContractKind;
+  startsOn: string;
+  endsOn: string;
+  assets: number;
+  state: ContractState;
+};
 
 // Shapes and list rules for the Vendors page (server) and table (client).
 // AMCs are contracts on assets (owner, 18-11-2026), not vendor fields.
@@ -14,6 +24,8 @@ export type VendorRow = {
   phone: string | null;
   email: string | null;
   address: string | null;
+  /** Warranty and AMC contracts with this vendor, latest end first. */
+  contracts: VendorContract[];
 };
 
 export const VENDORS_TABLE: TableDefaults = {

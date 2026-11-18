@@ -27,7 +27,10 @@ import {
 } from "@/components/ui/dialog";
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { CheckboxRow, FormMessage, TextField, inputClass } from "@/components/ui/field";
+import { KIND_LABEL } from "@/lib/contracts";
+import { formatDate } from "@/lib/dates";
 import { initialActionState, type ActionState } from "@/lib/form-actions";
+import { ContractStateChip } from "../contracts/contract-chip";
 import type { TableParams } from "@/lib/table-params";
 import { deleteVendor, saveVendor } from "./actions";
 import type { CategoryOption } from "./data";
@@ -216,11 +219,28 @@ export function VendorsView({
                   ]}
                 />
               </DrawerSection>
-              <DrawerSection title="Contracts and assets">
-                <p className="text-small text-text-2">
-                  AMC and warranty contracts with this vendor, and the assets they cover, appear here once assets are
-                  added. Jobs and repairs follow with their modules.
-                </p>
+              <DrawerSection title={`Warranty and AMC contracts (${open.contracts.length})`}>
+                {open.contracts.length === 0 ? (
+                  <p className="text-small text-text-2">
+                    None yet. Add one on <Link href="/admin/contracts">Warranty &amp; AMC</Link>.
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {open.contracts.map((c) => (
+                      <li key={c.code} className="flex items-start justify-between gap-2 text-cell">
+                        <span className="flex min-w-0 flex-col">
+                          <span>
+                            <span className="id">{c.code}</span> · {KIND_LABEL[c.kind]}
+                          </span>
+                          <span className="text-small text-text-3 tabular-nums">
+                            {formatDate(c.startsOn)} – {formatDate(c.endsOn)} · {c.assets} {c.assets === 1 ? "asset" : "assets"}
+                          </span>
+                        </span>
+                        <ContractStateChip state={c.state} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </DrawerSection>
             </DrawerBody>
             <DrawerFooter

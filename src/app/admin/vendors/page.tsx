@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Vendors" };
 // record their work. AMCs are contracts on assets, recorded with Assets.
 export default async function VendorsPage({ searchParams }: PageProps<"/admin/vendors">) {
   const { ctx, supabase } = await requireAdmin();
-  const { vendors, categories } = await loadVendors(supabase, ctx.brand.id);
+  const { vendors, categories } = await loadVendors(supabase, ctx.brand.id, ctx.timeZone);
 
   const query = await searchParams;
   const category =

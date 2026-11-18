@@ -82,6 +82,133 @@ export type Database = {
           },
         ]
       }
+      assets: {
+        Row: {
+          assigned_to: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          installation_date: string | null
+          last_serviced_on: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          price: number | null
+          purchase_date: string | null
+          purchased_from_id: string | null
+          qr_key: string
+          retire_reason: string | null
+          retired_on: string | null
+          room_id: string
+          serial_no: string | null
+          sla_priority: Database["public"]["Enums"]["sla_priority"] | null
+          spec_values: Json
+          status: Database["public"]["Enums"]["asset_status"]
+          sub_category_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installation_date?: string | null
+          last_serviced_on?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          price?: number | null
+          purchase_date?: string | null
+          purchased_from_id?: string | null
+          qr_key?: string
+          retire_reason?: string | null
+          retired_on?: string | null
+          room_id: string
+          serial_no?: string | null
+          sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          spec_values?: Json
+          status?: Database["public"]["Enums"]["asset_status"]
+          sub_category_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installation_date?: string | null
+          last_serviced_on?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          price?: number | null
+          purchase_date?: string | null
+          purchased_from_id?: string | null
+          qr_key?: string
+          retire_reason?: string | null
+          retired_on?: string | null
+          room_id?: string
+          serial_no?: string | null
+          sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          spec_values?: Json
+          status?: Database["public"]["Enums"]["asset_status"]
+          sub_category_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_organization_id_purchased_from_id_fkey"
+            columns: ["organization_id", "purchased_from_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "assets_organization_id_room_id_fkey"
+            columns: ["organization_id", "room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "assets_organization_id_sub_category_id_fkey"
+            columns: ["organization_id", "sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -247,6 +374,95 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          asset_ids: string[]
+          code: string
+          contract_no: string | null
+          cost: number | null
+          coverage: string | null
+          created_at: string
+          created_by: string | null
+          ends_on: string
+          id: string
+          kind: Database["public"]["Enums"]["contract_kind"]
+          not_renewing: boolean
+          organization_id: string
+          renewed_from_id: string | null
+          starts_on: string
+          updated_at: string
+          vendor_id: string | null
+          visits_per_year: number | null
+        }
+        Insert: {
+          asset_ids?: string[]
+          code?: string
+          contract_no?: string | null
+          cost?: number | null
+          coverage?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on: string
+          id?: string
+          kind: Database["public"]["Enums"]["contract_kind"]
+          not_renewing?: boolean
+          organization_id: string
+          renewed_from_id?: string | null
+          starts_on: string
+          updated_at?: string
+          vendor_id?: string | null
+          visits_per_year?: number | null
+        }
+        Update: {
+          asset_ids?: string[]
+          code?: string
+          contract_no?: string | null
+          cost?: number | null
+          coverage?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["contract_kind"]
+          not_renewing?: boolean
+          organization_id?: string
+          renewed_from_id?: string | null
+          starts_on?: string
+          updated_at?: string
+          vendor_id?: string | null
+          visits_per_year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_renewed_from_id_fkey"
+            columns: ["organization_id", "renewed_from_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_vendor_id_fkey"
+            columns: ["organization_id", "vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["organization_id", "id"]
           },
         ]
       }
@@ -977,6 +1193,8 @@ export type Database = {
         | "store_incharge"
         | "dean"
         | "quality_manager"
+      asset_status: "operational" | "under_maintenance" | "in_storage" | "retired"
+      contract_kind: "amc" | "camc" | "warranty" | "extended_warranty"
       notification_type:
         | "wo_assigned"
         | "inspection_assigned"
@@ -1144,6 +1362,8 @@ export const Constants = {
         "dean",
         "quality_manager",
       ],
+      asset_status: ["operational", "under_maintenance", "in_storage", "retired"],
+      contract_kind: ["amc", "camc", "warranty", "extended_warranty"],
       notification_type: [
         "wo_assigned",
         "inspection_assigned",

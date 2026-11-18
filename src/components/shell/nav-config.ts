@@ -10,6 +10,7 @@ import {
   ListChecks,
   MapPin,
   Package,
+  ShieldCheck,
   QrCode,
   Tag,
   Truck,
@@ -79,7 +80,10 @@ export const NAV: NavGroup[] = [
   {
     label: "Assets",
     items: [
-      { label: "Assets", href: "/admin/assets", icon: Box, phase: 2 },
+      { label: "Assets", href: "/admin/assets", icon: Box, phase: 2, built: true },
+      // Warranty and AMC contracts are core (owner, 18-11-2026); the
+      // warranty_amc module adds reminders on top.
+      { label: "Warranty & AMC", href: "/admin/contracts", icon: ShieldCheck, phase: 2, built: true },
       { label: "Spares & inventory", href: "/admin/spares", icon: Package, phase: 2, module: "spares" },
       { label: "QR codes", href: "/admin/qr-codes", icon: QrCode, phase: 2 },
       { label: "Documents", href: "/admin/documents", icon: FileText, phase: 2 },
