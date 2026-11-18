@@ -91,6 +91,7 @@ describe("findNavLeaf and navSectionParams", () => {
     expect(paths).not.toContain("people"); // has its own route
     expect(paths).not.toContain("locations");
     expect(paths).not.toContain("categories");
+    expect(paths).not.toContain("vendors");
     expect(new Set(paths).size).toBe(paths.length);
   });
 

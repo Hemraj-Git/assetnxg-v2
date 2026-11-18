@@ -67,6 +67,6 @@ From `reference/old-schema-baseline-0056.sql` plus 0057 and 0058. In v1, ids are
    - `memberships.department_id` replaces `profiles.department` (one department per person in each organisation).
    - `approval_delegations` (from_user, to_user, starts_on, ends_on, reason) covers an approver on leave.
    - "Head of department" comes from the department, not from a role. See `06-new-modules.md` §B, "Approvals and hierarchy".
-7. **Warranty/AMC**: see `06-new-modules.md` (contracts table, reminder settings).
+7. **Warranty/AMC**: core `contracts` (vendor, kind, contract no., dates, cost, coverage, `renewed_from_id`, `not_renewing`) and `contract_assets` (contract ↔ asset, many-to-many), built with Assets. v1's vendor and asset AMC columns are not kept; the Warranty & AMC module adds reminders. See `06-new-modules.md` §A.
 8. **Procurement tables**: see `06-new-modules.md`.
 9. **Assistant**: `assistant_conversations`, `assistant_messages`, `assistant_actions` (proposed / confirmed / rejected, with payload and result).

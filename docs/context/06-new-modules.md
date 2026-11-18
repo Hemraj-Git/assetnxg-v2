@@ -17,6 +17,10 @@
   - **Renew** action: a new contract carrying the vendor forward, with the new dates and document;
   - the Warranty & AMC report uses contracts.
 - **Procurement link:** goods received as equipment (see B, 5.8) can be registered as an asset with its warranty already filled in.
+- **Owner decisions 18-11-2026** (these replace the earlier "AMC on the vendor"):
+  - **An AMC or warranty is a contract that covers one or more assets** (`contracts` + `contract_assets`): vendor, kind (AMC / Comprehensive AMC / Warranty / Extended warranty), contract no., dates, cost, coverage, document. One vendor servicing 40 ACs under one contract = one contract listing 40 assets; different terms = separate contracts. An asset can't be in two overlapping contracts of the same kind. Renewing carries the assets forward (`renewed_from_id`). Vendors have no AMC fields.
+  - **Recording contracts is core, for every client.** This module adds the reminders, notifications, the "Expiring soon" panel and renewal follow-up; it stores no contract data of its own.
+  - What a vendor supplies is chosen from the client's categories (`vendors.category_ids`), not free text.
 
 ## B. Procurement (SoMS procedure SOMSQP-PRO-01, Issue 02, 06-07-2026)
 
