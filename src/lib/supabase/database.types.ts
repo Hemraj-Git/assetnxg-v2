@@ -610,6 +610,72 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          asset_ids: string[]
+          code: string
+          contract_ids: string[]
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          organization_id: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          asset_ids?: string[]
+          code?: string
+          contract_ids?: string[]
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          file_name: string
+          file_path: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          organization_id: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          asset_ids?: string[]
+          code?: string
+          contract_ids?: string[]
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          organization_id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
@@ -1116,6 +1182,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      link_documents: {
+        Args: {
+          p_document_ids: string[]
+          p_link: boolean
+          p_org: string
+          p_target: string
+          p_target_id: string
+        }
+        Returns: number
+      }
       org_add_member: {
         Args: {
           p_department?: string
@@ -1256,6 +1332,12 @@ export type Database = {
       asset_status: "operational" | "under_maintenance" | "in_storage" | "retired"
       checklist_kind: "pm" | "inspection"
       contract_kind: "amc" | "camc" | "warranty" | "extended_warranty"
+      document_type:
+        | "invoice"
+        | "warranty"
+        | "user_guide"
+        | "amc_contract"
+        | "other"
       notification_type:
         | "wo_assigned"
         | "inspection_assigned"
@@ -1427,6 +1509,13 @@ export const Constants = {
       asset_status: ["operational", "under_maintenance", "in_storage", "retired"],
       checklist_kind: ["pm", "inspection"],
       contract_kind: ["amc", "camc", "warranty", "extended_warranty"],
+      document_type: [
+        "invoice",
+        "warranty",
+        "user_guide",
+        "amc_contract",
+        "other",
+      ],
       notification_type: [
         "wo_assigned",
         "inspection_assigned",

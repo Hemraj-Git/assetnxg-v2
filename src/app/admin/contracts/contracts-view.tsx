@@ -25,6 +25,8 @@ import { initialActionState, type ActionState } from "@/lib/form-actions";
 import { currencySymbol, formatAmount } from "@/lib/money";
 import { formatCount, type TableParams } from "@/lib/table-params";
 import { cn } from "cn";
+import type { DocumentRow } from "../documents/data";
+import { LinkedDocuments } from "../documents/linked-documents";
 import { deleteContract, setNotRenewing } from "./actions";
 import { ContractStateChip, contractDaysText } from "./contract-chip";
 import { ContractDialog, type ContractDialogMode, type ContractRefs } from "./contract-dialog";
@@ -38,6 +40,7 @@ export function ContractsView({
   attention,
   filters,
   refs,
+  documents,
   timeZone,
 }: {
   rows: ContractRow[];
@@ -47,6 +50,7 @@ export function ContractsView({
   attention: number;
   filters: ContractFilters;
   refs: ContractRefs;
+  documents: DocumentRow[];
   timeZone: string;
 }) {
   const router = useRouter();
@@ -302,6 +306,15 @@ export function ContractsView({
                     ))}
                   </ul>
                 )}
+              </DrawerSection>
+              <DrawerSection title="Documents">
+                <LinkedDocuments
+                  key={open.id}
+                  target={{ kind: "contract", id: open.id, label: `${open.code} · ${KIND_LABEL[open.kind]}` }}
+                  documents={documents.filter((d) => d.contractIds.includes(open.id))}
+                  library={documents}
+                  uploadType={open.kind === "amc" || open.kind === "camc" ? "amc_contract" : "warranty"}
+                />
               </DrawerSection>
               <Button variant="ghost" className="w-fit" onClick={() => setDeleteId(open.id)}>
                 <Trash2 aria-hidden /> Delete contract

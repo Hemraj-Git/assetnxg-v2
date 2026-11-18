@@ -95,6 +95,7 @@ describe("findNavLeaf and navSectionParams", () => {
     expect(paths).not.toContain("assets");
     expect(paths).not.toContain("contracts");
     expect(paths).not.toContain("templates");
+    expect(paths).not.toContain("documents");
     expect(new Set(paths).size).toBe(paths.length);
   });
 

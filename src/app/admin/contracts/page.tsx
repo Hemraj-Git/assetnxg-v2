@@ -11,6 +11,7 @@ import {
   parseContractFilters,
 } from "./contracts-table";
 import { loadContractRefs, loadContracts } from "./data";
+import { loadContractOptions, loadDocuments } from "../documents/data";
 
 export const metadata: Metadata = { title: "Warranty & AMC" };
 
@@ -19,7 +20,11 @@ export const metadata: Metadata = { title: "Warranty & AMC" };
 export default async function ContractsPage({ searchParams }: PageProps<"/admin/contracts">) {
   const { ctx, supabase } = await requireAdmin();
   const refs = await loadContractRefs(supabase, ctx.brand.id);
-  const all = await loadContracts(supabase, ctx.brand.id, ctx.timeZone, refs);
+  const [all, contractOptions] = await Promise.all([
+    loadContracts(supabase, ctx.brand.id, ctx.timeZone, refs),
+    loadContractOptions(supabase, ctx.brand.id, refs.vendors),
+  ]);
+  const documents = await loadDocuments(supabase, ctx.brand.id, { assets: refs.assets, contracts: contractOptions });
 
   const query = await searchParams;
   const filters = parseContractFilters(query);
@@ -50,6 +55,7 @@ export default async function ContractsPage({ searchParams }: PageProps<"/admin/
         attention={attention}
         filters={filters}
         refs={refs}
+        documents={documents}
         timeZone={ctx.timeZone}
       />
     </PageBody>

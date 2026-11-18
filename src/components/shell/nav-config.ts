@@ -86,7 +86,7 @@ export const NAV: NavGroup[] = [
       { label: "Warranty & AMC", href: "/admin/contracts", icon: ShieldCheck, phase: 2, built: true },
       { label: "Spares & inventory", href: "/admin/spares", icon: Package, phase: 2, module: "spares" },
       { label: "QR codes", href: "/admin/qr-codes", icon: QrCode, phase: 2 },
-      { label: "Documents", href: "/admin/documents", icon: FileText, phase: 2 },
+      { label: "Documents", href: "/admin/documents", icon: FileText, phase: 2, built: true },
     ],
   },
   {

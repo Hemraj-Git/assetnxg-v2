@@ -13,6 +13,8 @@ import { AssetStatusChip } from "../asset-status";
 import { loadAsset, loadAssetActivity, loadAssetRefs, type ActivityEntry } from "../data";
 import { placeOf, refMaps } from "../rows";
 import { loadContractRefs, loadContracts } from "../../contracts/data";
+import { loadContractOptions, loadDocumentOptions, loadDocuments } from "../../documents/data";
+import { LinkedDocuments } from "../../documents/linked-documents";
 import { AssetCoverPanel } from "./asset-cover-panel";
 import { AssetPageActions } from "./asset-page-actions";
 
@@ -50,7 +52,17 @@ export default async function AssetPage({ params, searchParams }: PageProps<"/ad
     loadAssetActivity(supabase, ctx.brand.id, asset.id),
     loadContractRefs(supabase, ctx.brand.id),
   ]);
-  const contracts = await loadContracts(supabase, ctx.brand.id, ctx.timeZone, contractRefs, { assetId: asset.id });
+  const [contracts, contractOptions, library] = await Promise.all([
+    loadContracts(supabase, ctx.brand.id, ctx.timeZone, contractRefs, { assetId: asset.id }),
+    loadContractOptions(supabase, ctx.brand.id, contractRefs.vendors),
+    loadDocumentOptions(supabase, ctx.brand.id),
+  ]);
+  const documents = await loadDocuments(
+    supabase,
+    ctx.brand.id,
+    { assets: contractRefs.assets, contracts: contractOptions },
+    { assetId: asset.id },
+  );
 
   const maps = refMaps(refs);
   const { room, building, campus } = placeOf(maps, asset.roomId);
@@ -136,6 +148,13 @@ export default async function AssetPage({ params, searchParams }: PageProps<"/ad
 
         <div className="flex flex-col gap-4">
           <AssetCoverPanel assetId={asset.id} contracts={contracts} refs={contractRefs} today={today} />
+          <Panel title={`Documents${documents.length ? ` (${documents.length})` : ""}`}>
+            <LinkedDocuments
+              target={{ kind: "asset", id: asset.id, label: `${asset.code} · ${asset.name}` }}
+              documents={documents}
+              library={library}
+            />
+          </Panel>
           <Panel title="PM and inspection schedules">
             <p className="text-small text-text-2">Schedules start here once checklist templates are set up.</p>
           </Panel>
