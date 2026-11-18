@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { daysBetween, parseDisplayDate, todayIso } from "@/lib/dates";
 import { plainDbError } from "@/lib/db-errors";
+import { TRY_AGAIN, fail, ok, optionalId, text, type ActionState } from "@/lib/form-actions";
 import { parseAssignableRoles, roleGroupsFor } from "@/lib/roles";
 import { requestOrigin } from "@/lib/request-origin";
 import { sendInvite } from "@/lib/supabase/auth-admin";
@@ -14,24 +15,7 @@ import { mergeRoles } from "./people-table";
 // server (requireAdmin); the database checks again (RLS, org_add_member,
 // the keep-an-Admin and no-loop triggers) and logs every change.
 
-export type ActionState = { error: string | null; success: string | null };
-
-const ok = (success: string): ActionState => ({ error: null, success });
-const fail = (error: string): ActionState => ({ error, success: null });
-
-const TRY_AGAIN = "That didn't work. Try again in a moment.";
-
-function text(formData: FormData, name: string): string {
-  const v = formData.get(name);
-  return typeof v === "string" ? v.trim() : "";
-}
-
-/** "" (No department) → null; otherwise it must look like an id. */
-function optionalId(formData: FormData, name: string): string | null | undefined {
-  const raw = text(formData, name);
-  if (!raw) return null;
-  return z.uuid().safeParse(raw).success ? raw : undefined;
-}
+export type { ActionState };
 
 // ───────────── People ─────────────
 

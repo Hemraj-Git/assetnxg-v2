@@ -89,6 +89,7 @@ describe("findNavLeaf and navSectionParams", () => {
     expect(paths).toContain("work-orders/preventive");
     expect(paths).not.toContain("");
     expect(paths).not.toContain("people"); // has its own route
+    expect(paths).not.toContain("locations");
     expect(new Set(paths).size).toBe(paths.length);
   });
 

@@ -126,6 +126,92 @@ export type Database = {
           },
         ]
       }
+      buildings: {
+        Row: {
+          campus_id: string
+          code: string
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          total_floors: number | null
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          code?: string
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          total_floors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          total_floors?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buildings_organization_id_campus_id_fkey"
+            columns: ["organization_id", "campus_id"]
+            isOneToOne: false
+            referencedRelation: "campuses"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "buildings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campuses: {
+        Row: {
+          address: string | null
+          code: string
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campuses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       counters: {
         Row: {
           kind: string
@@ -495,6 +581,118 @@ export type Database = {
         }
         Relationships: []
       }
+      room_types: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          area_sqft: number | null
+          building_id: string
+          code: string
+          created_at: string
+          floor: string | null
+          id: string
+          is_reservable: boolean
+          last_printed_at: string | null
+          name: string
+          organization_id: string
+          qr_key: string
+          room_type_id: string | null
+          status: Database["public"]["Enums"]["room_status"]
+          updated_at: string
+        }
+        Insert: {
+          area_sqft?: number | null
+          building_id: string
+          code?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_reservable?: boolean
+          last_printed_at?: string | null
+          name: string
+          organization_id: string
+          qr_key?: string
+          room_type_id?: string | null
+          status?: Database["public"]["Enums"]["room_status"]
+          updated_at?: string
+        }
+        Update: {
+          area_sqft?: number | null
+          building_id?: string
+          code?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_reservable?: boolean
+          last_printed_at?: string | null
+          name?: string
+          organization_id?: string
+          qr_key?: string
+          room_type_id?: string | null
+          status?: Database["public"]["Enums"]["room_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_organization_id_building_id_fkey"
+            columns: ["organization_id", "building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_organization_id_room_type_id_fkey"
+            columns: ["organization_id", "room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -648,6 +846,7 @@ export type Database = {
         | "request_escalated"
         | "request_closed"
         | "due_today"
+      room_status: "available" | "under_maintenance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -814,6 +1013,7 @@ export const Constants = {
         "request_closed",
         "due_today",
       ],
+      room_status: ["available", "under_maintenance"],
     },
   },
 } as const
