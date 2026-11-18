@@ -12,8 +12,10 @@ const row = (over: Partial<DocumentRow>): DocumentRow => ({
   fileSize: 1000,
   assetIds: [],
   contractIds: [],
+  spareIds: [],
   assets: [],
   contracts: [],
+  spares: [],
   uploadedBy: "Asha Rao",
   createdAt: "2026-11-18T08:00:00Z",
   ...over,
@@ -33,6 +35,7 @@ describe("documents table", () => {
     ];
     expect(applyDocumentFilters(rows, { type: "invoice", links: null }).map((r) => r.id)).toEqual(["a", "c"]);
     expect(applyDocumentFilters(rows, { type: null, links: "none" }).map((r) => r.id)).toEqual(["b", "c"]);
+    expect(applyDocumentFilters([row({ id: "s", spareIds: ["x"] })], { type: null, links: "none" })).toEqual([]);
   });
 
   it("searches linked assets and the file name", () => {
@@ -47,7 +50,8 @@ describe("documents table", () => {
   });
 
   it("describes links", () => {
-    expect(linksText({ assetIds: [], contractIds: [] })).toBe("Not linked");
-    expect(linksText({ assetIds: ["a"], contractIds: ["b", "c"] })).toBe("1 asset, 2 contracts");
+    expect(linksText({ assetIds: [], contractIds: [], spareIds: [] })).toBe("Not linked");
+    expect(linksText({ assetIds: ["a"], contractIds: ["b", "c"], spareIds: [] })).toBe("1 asset, 2 contracts");
+    expect(linksText({ assetIds: [], contractIds: [], spareIds: ["s"] })).toBe("1 spare");
   });
 });

@@ -38,7 +38,7 @@ export type DocumentDialogMode =
   | {
       mode: "new";
       /** Upload from an asset or contract: linked to it, no pickers. */
-      attachTo?: { assetIds?: string[]; contractIds?: string[]; label: string };
+      attachTo?: { assetIds?: string[]; contractIds?: string[]; spareIds?: string[]; label: string };
       docType?: DocumentType;
     }
   | { mode: "edit"; doc: DocumentRow };
@@ -229,6 +229,9 @@ export function DocumentDialog({
                 ))}
                 {[...contracts].map((id) => (
                   <input key={id} type="hidden" name="contract_ids" value={id} />
+                ))}
+                {(attachTo?.spareIds ?? []).map((id) => (
+                  <input key={id} type="hidden" name="spare_ids" value={id} />
                 ))}
               </>
             ) : (

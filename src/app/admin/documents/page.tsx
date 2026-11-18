@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { formatFileSize } from "@/lib/documents";
 import { applyTableParams, formatCount, parseTableParams } from "@/lib/table-params";
 import { loadContractRefs } from "../contracts/data";
-import { loadContractOptions, loadDocuments } from "./data";
+import { loadContractOptions, loadDocuments, loadSpareOptions } from "./data";
 import {
   DOCUMENTS_TABLE,
   applyDocumentFilters,
@@ -22,8 +22,11 @@ export const metadata: Metadata = { title: "Documents" };
 export default async function DocumentsPage({ searchParams }: PageProps<"/admin/documents">) {
   const { ctx, supabase } = await requireAdmin();
   const assetRefs = await loadContractRefs(supabase, ctx.brand.id);
-  const contracts = await loadContractOptions(supabase, ctx.brand.id, assetRefs.vendors);
-  const all = await loadDocuments(supabase, ctx.brand.id, { assets: assetRefs.assets, contracts });
+  const [contracts, spares] = await Promise.all([
+    loadContractOptions(supabase, ctx.brand.id, assetRefs.vendors),
+    ctx.modules.includes("spares") ? loadSpareOptions(supabase, ctx.brand.id) : Promise.resolve([]),
+  ]);
+  const all = await loadDocuments(supabase, ctx.brand.id, { assets: assetRefs.assets, contracts, spares });
 
   const query = await searchParams;
   const filters = parseDocumentFilters(query);
@@ -32,7 +35,7 @@ export default async function DocumentsPage({ searchParams }: PageProps<"/admin/
     searchText: documentSearchText,
     sortValue: documentSortValue,
   });
-  const unlinked = all.filter((d) => d.assetIds.length + d.contractIds.length === 0).length;
+  const unlinked = all.filter((d) => d.assetIds.length + d.contractIds.length + d.spareIds.length === 0).length;
   const bytes = all.reduce((sum, d) => sum + d.fileSize, 0);
 
   return (

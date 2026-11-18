@@ -21,7 +21,7 @@ import type { DocumentOption, DocumentRow } from "./data";
 import { DocumentDialog } from "./document-dialog";
 
 
-export type LinkTarget = { kind: "asset" | "contract"; id: string; label: string };
+export type LinkTarget = { kind: "asset" | "contract" | "spare"; id: string; label: string };
 
 /** The documents attached to one asset or contract: open, download, remove
  *  from here; attach from the library or upload a new one. */
@@ -110,7 +110,9 @@ export function LinkedDocuments({
             attachTo:
               target.kind === "asset"
                 ? { assetIds: [target.id], label: target.label }
-                : { contractIds: [target.id], label: target.label },
+                : target.kind === "contract"
+                  ? { contractIds: [target.id], label: target.label }
+                  : { spareIds: [target.id], label: target.label },
           }}
           refs={null}
           onClose={() => setUploading(false)}

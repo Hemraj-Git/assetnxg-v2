@@ -84,7 +84,7 @@ export const NAV: NavGroup[] = [
       // Warranty and AMC contracts are core (owner, 18-11-2026); the
       // warranty_amc module adds reminders on top.
       { label: "Warranty & AMC", href: "/admin/contracts", icon: ShieldCheck, phase: 2, built: true },
-      { label: "Spares & inventory", href: "/admin/spares", icon: Package, phase: 2, module: "spares" },
+      { label: "Spares & inventory", href: "/admin/spares", icon: Package, phase: 2, module: "spares", built: true },
       { label: "QR codes", href: "/admin/qr-codes", icon: QrCode, phase: 2 },
       { label: "Documents", href: "/admin/documents", icon: FileText, phase: 2, built: true },
     ],

@@ -623,6 +623,7 @@ export type Database = {
           file_type: string
           id: string
           organization_id: string
+          spare_ids: string[]
           title: string
           updated_at: string
           uploaded_by: string | null
@@ -639,6 +640,7 @@ export type Database = {
           file_type?: string
           id?: string
           organization_id: string
+          spare_ids?: string[]
           title: string
           updated_at?: string
           uploaded_by?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           file_type?: string
           id?: string
           organization_id?: string
+          spare_ids?: string[]
           title?: string
           updated_at?: string
           uploaded_by?: string | null
@@ -1070,6 +1073,191 @@ export type Database = {
           },
         ]
       }
+      spares: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          handling_note: string | null
+          id: string
+          manufacturer: string | null
+          min_stock: number | null
+          model: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          part_no: string | null
+          purchase_date: string | null
+          quantity: number
+          room_id: string | null
+          serial_no: string | null
+          spec_values: Json
+          storage_note: string | null
+          sub_category_id: string
+          unit_cost: number | null
+          updated_at: string
+          vendor_id: string | null
+          warranty_till: string | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          handling_note?: string | null
+          id?: string
+          manufacturer?: string | null
+          min_stock?: number | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          part_no?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          room_id?: string | null
+          serial_no?: string | null
+          spec_values?: Json
+          storage_note?: string | null
+          sub_category_id: string
+          unit_cost?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          warranty_till?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          handling_note?: string | null
+          id?: string
+          manufacturer?: string | null
+          min_stock?: number | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          part_no?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          room_id?: string | null
+          serial_no?: string | null
+          spec_values?: Json
+          storage_note?: string | null
+          sub_category_id?: string
+          unit_cost?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          warranty_till?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spares_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spares_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spares_organization_id_room_id_fkey"
+            columns: ["organization_id", "room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "spares_organization_id_sub_category_id_fkey"
+            columns: ["organization_id", "sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "spares_organization_id_vendor_id_fkey"
+            columns: ["organization_id", "vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          asset_id: string | null
+          balance_after: number
+          change: number
+          counted: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          reason: Database["public"]["Enums"]["stock_reason"]
+          spare_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          balance_after?: number
+          change?: number
+          counted?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          reason: Database["public"]["Enums"]["stock_reason"]
+          spare_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          balance_after?: number
+          change?: number
+          counted?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          reason?: Database["public"]["Enums"]["stock_reason"]
+          spare_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_organization_id_asset_id_fkey"
+            columns: ["organization_id", "asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "stock_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_organization_id_spare_id_fkey"
+            columns: ["organization_id", "spare_id"]
+            isOneToOne: false
+            referencedRelation: "spares"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
       sub_categories: {
         Row: {
           asset_fields: Json
@@ -1182,6 +1370,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      deploy_spare: {
+        Args: {
+          p_installation_date?: string
+          p_name?: string
+          p_org: string
+          p_room: string
+          p_serial_no?: string
+          p_spare: string
+        }
+        Returns: string
+      }
       link_documents: {
         Args: {
           p_document_ids: string[]
@@ -1352,6 +1551,7 @@ export type Database = {
       repeat_interval: "weekly" | "monthly" | "quarterly" | "half_yearly" | "annually"
       room_status: "available" | "under_maintenance"
       sla_priority: "critical" | "high" | "medium" | "low"
+      stock_reason: "opening" | "received" | "issued" | "adjusted" | "deployed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1531,6 +1731,7 @@ export const Constants = {
       repeat_interval: ["weekly", "monthly", "quarterly", "half_yearly", "annually"],
       room_status: ["available", "under_maintenance"],
       sla_priority: ["critical", "high", "medium", "low"],
+      stock_reason: ["opening", "received", "issued", "adjusted", "deployed"],
     },
   },
 } as const

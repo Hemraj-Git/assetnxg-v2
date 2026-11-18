@@ -2,6 +2,7 @@ import "server-only";
 
 import { KIND_LABEL } from "@/lib/contracts";
 import type { DocumentType } from "@/lib/documents";
+import { FORMER_MEMBER, loadPeopleNames } from "@/lib/people-names";
 import type { createClient } from "@/lib/supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -18,15 +19,17 @@ export type DocumentRow = {
   fileSize: number;
   assetIds: string[];
   contractIds: string[];
-  /** Linked assets and contracts this page can name, in number order. */
+  spareIds: string[];
+  /** Linked assets, contracts and spares this page can name, in number order. */
   assets: LinkRef[];
   contracts: LinkRef[];
+  spares: LinkRef[];
   uploadedBy: string;
   createdAt: string;
 };
 
 /** A document as the "choose from library" list shows it. */
-export type DocumentOption = Pick<DocumentRow, "id" | "code" | "title" | "docType" | "fileName" | "assetIds" | "contractIds">;
+export type DocumentOption = Pick<DocumentRow, "id" | "code" | "title" | "docType" | "fileName" | "assetIds" | "contractIds" | "spareIds">;
 
 const byCode = (a: { code: string }, b: { code: string }) => a.code.localeCompare(b.code, "en", { numeric: true });
 
@@ -52,37 +55,31 @@ export async function loadContractOptions(
     .sort(byCode);
 }
 
-type Only = { assetId?: string; contractId?: string };
+type Only = { assetId?: string; contractId?: string; spareId?: string };
 
 /** This client's documents, newest first (optionally only those linked to
- *  one asset or contract). RLS limits them to staff of this client. */
+ *  one asset, contract or spare). RLS limits them to staff of this client. */
 export async function loadDocuments(
   supabase: Supabase,
   orgId: string,
-  refs: { assets: LinkRef[]; contracts: LinkRef[] },
+  refs: { assets: LinkRef[]; contracts: LinkRef[]; spares?: LinkRef[] },
   only: Only = {},
 ): Promise<DocumentRow[]> {
   let q = supabase
     .from("documents")
-    .select("id, code, title, doc_type, file_name, file_type, file_size, asset_ids, contract_ids, uploaded_by, created_at")
+    .select("id, code, title, doc_type, file_name, file_type, file_size, asset_ids, contract_ids, spare_ids, uploaded_by, created_at")
     .eq("organization_id", orgId);
   if (only.assetId) q = q.contains("asset_ids", [only.assetId]);
   if (only.contractId) q = q.contains("contract_ids", [only.contractId]);
+  if (only.spareId) q = q.contains("spare_ids", [only.spareId]);
   const { data, error } = await q.order("created_at", { ascending: false });
   if (error || !data) throw new Error(`Could not load documents: ${error?.message ?? "no data"}`);
 
-  const uploaderIds = [...new Set(data.map((d) => d.uploaded_by).filter((id): id is string => Boolean(id)))];
-  const people = new Map<string, string>();
-  if (uploaderIds.length) {
-    const p = await supabase.from("profiles").select("id, full_name, email, is_support").in("id", uploaderIds);
-    for (const x of p.data ?? []) {
-      // Support logins are never named to clients (CLAUDE.md).
-      people.set(x.id, x.is_support ? "AssetNXG support" : x.full_name || x.email || "Unnamed");
-    }
-  }
+  const people = await loadPeopleNames(supabase, data.map((d) => d.uploaded_by));
 
   const asset = new Map(refs.assets.map((x) => [x.id, { id: x.id, code: x.code, name: x.name }]));
   const contract = new Map(refs.contracts.map((x) => [x.id, { id: x.id, code: x.code, name: x.name }]));
+  const spare = new Map((refs.spares ?? []).map((x) => [x.id, { id: x.id, code: x.code, name: x.name }]));
 
   return data.map((d) => ({
     id: d.id,
@@ -94,9 +91,11 @@ export async function loadDocuments(
     fileSize: d.file_size,
     assetIds: d.asset_ids,
     contractIds: d.contract_ids,
+    spareIds: d.spare_ids,
     assets: d.asset_ids.map((id) => asset.get(id)).filter((x): x is LinkRef => Boolean(x)).sort(byCode),
     contracts: d.contract_ids.map((id) => contract.get(id)).filter((x): x is LinkRef => Boolean(x)).sort(byCode),
-    uploadedBy: d.uploaded_by ? (people.get(d.uploaded_by) ?? "Someone who has left") : "Someone who has left",
+    spares: d.spare_ids.map((id) => spare.get(id)).filter((x): x is LinkRef => Boolean(x)).sort(byCode),
+    uploadedBy: (d.uploaded_by && people.get(d.uploaded_by)) || FORMER_MEMBER,
     createdAt: d.created_at,
   }));
 }
@@ -105,7 +104,7 @@ export async function loadDocuments(
 export async function loadDocumentOptions(supabase: Supabase, orgId: string): Promise<DocumentOption[]> {
   const { data, error } = await supabase
     .from("documents")
-    .select("id, code, title, doc_type, file_name, asset_ids, contract_ids")
+    .select("id, code, title, doc_type, file_name, asset_ids, contract_ids, spare_ids")
     .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
     .limit(2000);
@@ -118,5 +117,13 @@ export async function loadDocumentOptions(supabase: Supabase, orgId: string): Pr
     fileName: d.file_name,
     assetIds: d.asset_ids,
     contractIds: d.contract_ids,
+    spareIds: d.spare_ids,
   }));
+}
+
+/** Spares a document can name (empty when the Spares module is off: RLS
+ *  hides them). */
+export async function loadSpareOptions(supabase: Supabase, orgId: string): Promise<LinkRef[]> {
+  const { data } = await supabase.from("spares").select("id, code, name").eq("organization_id", orgId);
+  return (data ?? []).map((x) => ({ id: x.id, code: x.code, name: x.name })).sort(byCode);
 }

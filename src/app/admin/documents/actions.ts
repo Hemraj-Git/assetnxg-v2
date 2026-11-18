@@ -60,7 +60,8 @@ function readDetails(formData: FormData): { title: string; docType: DocumentType
 }
 
 /** Step 2: save the document (new: after the file is uploaded), or edit its
- *  title, type and links (id). */
+ *  title, type and asset / contract links (id). Spare links are set when
+ *  uploading from a spare, and changed from the spare's page. */
 export async function saveDocument(id: string | null, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const { ctx, supabase } = await requireAdmin();
   if (id !== null && !isId(id)) return fail(TRY_AGAIN);
@@ -80,10 +81,12 @@ export async function saveDocument(id: string | null, _prev: ActionState, formDa
     const fileName = text(formData, "file_name");
     if (!isDocumentPath(path, ctx.brand.id)) return fail("Choose the file to upload.");
     if (!fileName || fileName.length > MAX_FILE_NAME) return fail("Rename the file to something shorter, then choose it again.");
+    const spareIds = readLinks(formData, "spare_ids");
+    if (!spareIds || spareIds.length > 500) return fail("Choose spares from the list.");
 
     const { data, error } = await supabase
       .from("documents")
-      .insert({ ...values, organization_id: ctx.brand.id, file_path: path, file_name: fileName })
+      .insert({ ...values, spare_ids: spareIds, organization_id: ctx.brand.id, file_path: path, file_name: fileName })
       .select("code")
       .single();
     if (error) {
@@ -106,15 +109,15 @@ export async function saveDocument(id: string | null, _prev: ActionState, formDa
   return ok(`${data[0].code} saved.`);
 }
 
-/** Attach documents to an asset or contract, or remove one from it. */
+/** Attach documents to an asset, contract or spare, or remove one from it. */
 export async function linkDocuments(
-  target: "asset" | "contract",
+  target: "asset" | "contract" | "spare",
   targetId: string,
   documentIds: string[],
   link: boolean,
 ): Promise<ActionState> {
   const { ctx, supabase } = await requireAdmin();
-  if ((target !== "asset" && target !== "contract") || !isId(targetId)) return fail(TRY_AGAIN);
+  if (!["asset", "contract", "spare"].includes(target) || !isId(targetId)) return fail(TRY_AGAIN);
   if (!Array.isArray(documentIds) || documentIds.length === 0 || documentIds.length > 200 || !documentIds.every(isId)) {
     return fail("Choose documents from the list.");
   }

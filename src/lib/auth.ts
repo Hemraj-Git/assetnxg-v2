@@ -164,6 +164,14 @@ export async function requireAdmin() {
   return member;
 }
 
+/** As requireAdmin, and the client must have the module switched on (the
+ *  database's policies check the module again). */
+export async function requireAdminModule(required: ModuleRequirement) {
+  const admin = await requireAdmin();
+  if (!moduleEnabled(required, admin.ctx.modules)) notFound();
+  return admin;
+}
+
 /** As requireMember, and the client must have the module switched on. */
 export async function requireModule(required: ModuleRequirement) {
   const member = await requireMember();

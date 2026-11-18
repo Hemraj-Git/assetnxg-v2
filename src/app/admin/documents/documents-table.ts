@@ -20,6 +20,7 @@ export function documentSearchText(d: DocumentRow): string {
     d.uploadedBy,
     ...d.assets.map((a) => `${a.code} ${a.name}`),
     ...d.contracts.map((c) => `${c.code} ${c.name}`),
+    ...d.spares.map((s) => `${s.code} ${s.name}`),
   ].join(" ");
 }
 
@@ -32,7 +33,7 @@ export function documentSortValue(d: DocumentRow, column: string): string | numb
     case "type":
       return DOC_TYPE_LABEL[d.docType];
     case "links":
-      return d.assetIds.length + d.contractIds.length;
+      return d.assetIds.length + d.contractIds.length + d.spareIds.length;
     case "size":
       return d.fileSize;
     case "uploaded":
@@ -56,15 +57,16 @@ export function applyDocumentFilters(rows: readonly DocumentRow[], f: DocumentFi
   return rows.filter(
     (d) =>
       (!f.type || d.docType === f.type) &&
-      (f.links !== "none" || d.assetIds.length + d.contractIds.length === 0),
+      (f.links !== "none" || d.assetIds.length + d.contractIds.length + d.spareIds.length === 0),
   );
 }
 
-/** "3 assets, 1 contract" or "Not linked". */
-export function linksText(d: Pick<DocumentRow, "assetIds" | "contractIds">): string {
+/** "3 assets, 1 contract, 2 spares" or "Not linked". */
+export function linksText(d: Pick<DocumentRow, "assetIds" | "contractIds" | "spareIds">): string {
   const parts = [
     d.assetIds.length ? `${d.assetIds.length} ${d.assetIds.length === 1 ? "asset" : "assets"}` : "",
     d.contractIds.length ? `${d.contractIds.length} ${d.contractIds.length === 1 ? "contract" : "contracts"}` : "",
+    d.spareIds.length ? `${d.spareIds.length} ${d.spareIds.length === 1 ? "spare" : "spares"}` : "",
   ].filter(Boolean);
   return parts.length ? parts.join(", ") : "Not linked";
 }

@@ -60,7 +60,7 @@ export function DocumentsView({
   const index = rows.findIndex((r) => r.id === openId);
   const open = index >= 0 ? rows[index] : null;
   const deleting = rows.find((r) => r.id === deleteId) ?? null;
-  const deletingLinks = deleting ? deleting.assetIds.length + deleting.contractIds.length : 0;
+  const deletingLinks = deleting ? deleting.assetIds.length + deleting.contractIds.length + deleting.spareIds.length : 0;
 
   function setFilter(key: keyof DocumentFilters, value: string) {
     const next = new URLSearchParams(window.location.search);
@@ -92,10 +92,10 @@ export function DocumentsView({
       cell: ({ row }) => {
         const d = row.original;
         const text = linksText(d);
-        return d.assetIds.length + d.contractIds.length === 0 ? (
+        return d.assetIds.length + d.contractIds.length + d.spareIds.length === 0 ? (
           <span className="text-text-3">{text}</span>
         ) : (
-          <span title={[...d.assets, ...d.contracts].map((x) => x.code).join(", ")}>{text}</span>
+          <span title={[...d.assets, ...d.contracts, ...d.spares].map((x) => x.code).join(", ")}>{text}</span>
         );
       },
     },
@@ -292,6 +292,20 @@ export function DocumentsView({
                   </ul>
                 )}
               </DrawerSection>
+              {open.spares.length > 0 && (
+                <DrawerSection title={`Spares (${open.spares.length})`}>
+                  <ul className="flex flex-col gap-1.5">
+                    {open.spares.map((s) => (
+                      <li key={s.id} className="flex gap-3 text-cell">
+                        <Link href={`/admin/spares/${s.code}`} className="id w-20 flex-none">
+                          {s.code}
+                        </Link>
+                        <span className="truncate">{s.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </DrawerSection>
+              )}
               <Button variant="ghost" className="w-fit" onClick={() => setDeleteId(open.id)}>
                 <Trash2 aria-hidden /> Delete document
               </Button>
