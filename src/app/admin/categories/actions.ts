@@ -71,11 +71,25 @@ export async function saveSubCategory(
   const fields = parseAssetFields(formData.get("asset_fields"));
   if (!fields.ok) return fail(fields.error);
 
+  // Templates: what the form ticked, plus links the form couldn't show
+  // (templates of a module that is off, invisible to this request).
+  const chosen = formData.getAll("template_ids").filter((v): v is string => typeof v === "string");
+  if (!chosen.every(isId)) return fail("Choose templates from the list.");
+  const [visible, current] = await Promise.all([
+    supabase.from("checklist_templates").select("id").eq("organization_id", ctx.brand.id),
+    id ? supabase.from("sub_categories").select("template_ids").eq("id", id).eq("organization_id", ctx.brand.id).maybeSingle() : null,
+  ]);
+  if (visible.error) return fail(TRY_AGAIN);
+  const shown = new Set((visible.data ?? []).map((x) => x.id));
+  const kept = (current?.data?.template_ids ?? []).filter((t) => !shown.has(t));
+  const templateIds = [...new Set([...chosen.filter((t) => shown.has(t)), ...kept])];
+
   const values = {
     name: parsed.data.name,
     description: parsed.data.description || null,
     sla_priority: priority,
     asset_fields: fields.fields,
+    template_ids: templateIds,
   };
   const duplicate = `This category already has a sub-category called “${parsed.data.name}”.`;
 

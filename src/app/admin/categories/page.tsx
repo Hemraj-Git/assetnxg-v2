@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Categories" };
 // templates.
 export default async function CategoriesPage() {
   const { ctx, supabase } = await requireAdmin();
-  const { categories, subs } = await loadCategories(supabase, ctx.brand.id);
+  const { categories, subs, templates } = await loadCategories(supabase, ctx.brand.id);
 
   return (
     <PageBody>
@@ -22,7 +22,7 @@ export default async function CategoriesPage() {
           subs.length === 1 ? "sub-category" : "sub-categories"
         }. Every asset belongs to a sub-category.`}
       />
-      <CategoriesView rows={taxonomyTree(categories, subs)} categories={categories} />
+      <CategoriesView rows={taxonomyTree(categories, subs)} categories={categories} templates={templates} />
     </PageBody>
   );
 }

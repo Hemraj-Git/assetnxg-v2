@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition, type ReactNode } from "react";
 import {
   ArrowDown,
@@ -34,7 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FormMessage, SelectField, TextField, inputClass } from "@/components/ui/field";
+import { CheckboxRow, FormMessage, SelectField, TextField, inputClass } from "@/components/ui/field";
 import { StatusChip, type ChipTone } from "@/components/ui/status-chip";
 import {
   FIELD_TYPE_LABEL,
@@ -50,7 +51,9 @@ import {
   type TaxonomyRow,
 } from "@/lib/categories";
 import { initialActionState, type ActionState } from "@/lib/form-actions";
+import { REPEAT_LABEL } from "@/lib/templates";
 import { deleteTaxonomy, saveCategory, saveSubCategory } from "./actions";
+import type { TemplateOption } from "./data";
 
 const PRIORITY_STYLE: Record<SlaPriority, { tone: ChipTone; icon: LucideIcon }> = {
   critical: { tone: "danger", icon: Flame },
@@ -75,7 +78,15 @@ type Editing =
 
 type Deleting = { kind: "category" | "sub"; id: string; code: string; name: string; blocked: boolean } | null;
 
-export function CategoriesView({ rows, categories }: { rows: TaxonomyRow[]; categories: CategoryNode[] }) {
+export function CategoriesView({
+  rows,
+  categories,
+  templates,
+}: {
+  rows: TaxonomyRow[];
+  categories: CategoryNode[];
+  templates: TemplateOption[];
+}) {
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<Deleting>(null);
   const [notice, setNotice] = useState<ActionState>(initialActionState);
@@ -189,6 +200,9 @@ export function CategoriesView({ rows, categories }: { rows: TaxonomyRow[]; cate
                           </button>
                           <span className="text-small text-text-3">
                             <span className="id">{row.sub.code}</span>
+                            {row.sub.templateIds.length > 0
+                              ? ` · ${row.sub.templateIds.length} ${row.sub.templateIds.length === 1 ? "template" : "templates"}`
+                              : ""}
                             {row.sub.description ? ` · ${row.sub.description}` : ""}
                           </span>
                         </span>
@@ -245,6 +259,7 @@ export function CategoriesView({ rows, categories }: { rows: TaxonomyRow[]; cate
           key={editing.sub?.id ?? `new-${editing.category.id}`}
           sub={editing.sub}
           category={editing.category}
+          templates={templates}
           onClose={() => setEditing(null)}
           onDone={done}
         />
@@ -348,11 +363,13 @@ type DraftField = AssetField & { unit: string | null };
 function SubCategoryDialog({
   sub,
   category,
+  templates,
   onClose,
   onDone,
 }: {
   sub: SubCategoryNode | null;
   category: CategoryNode;
+  templates: TemplateOption[];
   onClose: () => void;
   onDone: (message: string) => void;
 }) {
@@ -404,6 +421,40 @@ function SubCategoryDialog({
               A request about an asset uses the asset&apos;s own priority; if it has none, this one; if neither, the person
               raising it chooses.
             </p>
+
+            {templates.length > 0 && (
+              <fieldset className="flex flex-col gap-2">
+                <legend className="mb-1 text-[13px] leading-[18px] font-medium">PM and inspection templates</legend>
+                <p className="text-small text-text-3">
+                  Assets of this kind are offered these checklists when schedules start. Not ticked here = &ldquo;Not
+                  scheduled&rdquo; never shows for them.
+                </p>
+                {(["pm", "inspection"] as const).map((kind) => {
+                  const list = templates.filter((t) => t.kind === kind);
+                  if (list.length === 0) return null;
+                  return (
+                    <div key={kind} className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium text-text-3 uppercase">{kind === "pm" ? "PM" : "Inspection"}</span>
+                      <div className="grid max-h-48 gap-1.5 overflow-y-auto sm:grid-cols-2">
+                        {list.map((t) => (
+                          <CheckboxRow
+                            key={t.id}
+                            name="template_ids"
+                            value={t.id}
+                            title={t.title}
+                            description={REPEAT_LABEL[t.repeats]}
+                            defaultChecked={sub?.templateIds.includes(t.id) ?? false}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-small text-text-3">
+                  Need another? <Link href="/admin/templates">Create it in Checklist templates</Link>, then tick it here.
+                </p>
+              </fieldset>
+            )}
 
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-1 text-[13px] leading-[18px] font-medium">Asset fields</legend>

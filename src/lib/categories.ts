@@ -101,6 +101,8 @@ export type SubCategoryNode = {
   description: string | null;
   slaPriority: SlaPriority | null;
   assetFields: AssetField[];
+  /** PM and inspection templates linked to it (visible ones). */
+  templateIds: string[];
 };
 
 export type TaxonomyRow =

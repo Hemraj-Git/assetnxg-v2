@@ -377,6 +377,63 @@ export type Database = {
           },
         ]
       }
+      checklist_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          items: Json
+          kind: Database["public"]["Enums"]["checklist_kind"]
+          organization_id: string
+          repeats: Database["public"]["Enums"]["repeat_interval"]
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          items?: Json
+          kind: Database["public"]["Enums"]["checklist_kind"]
+          organization_id: string
+          repeats: Database["public"]["Enums"]["repeat_interval"]
+          title: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          items?: Json
+          kind?: Database["public"]["Enums"]["checklist_kind"]
+          organization_id?: string
+          repeats?: Database["public"]["Enums"]["repeat_interval"]
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           asset_ids: string[]
@@ -958,6 +1015,7 @@ export type Database = {
           name: string
           organization_id: string
           sla_priority: Database["public"]["Enums"]["sla_priority"] | null
+          template_ids: string[]
           updated_at: string
         }
         Insert: {
@@ -970,6 +1028,7 @@ export type Database = {
           name: string
           organization_id: string
           sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          template_ids?: string[]
           updated_at?: string
         }
         Update: {
@@ -982,6 +1041,7 @@ export type Database = {
           name?: string
           organization_id?: string
           sla_priority?: Database["public"]["Enums"]["sla_priority"] | null
+          template_ids?: string[]
           updated_at?: string
         }
         Relationships: [
@@ -1194,6 +1254,7 @@ export type Database = {
         | "dean"
         | "quality_manager"
       asset_status: "operational" | "under_maintenance" | "in_storage" | "retired"
+      checklist_kind: "pm" | "inspection"
       contract_kind: "amc" | "camc" | "warranty" | "extended_warranty"
       notification_type:
         | "wo_assigned"
@@ -1206,6 +1267,7 @@ export type Database = {
         | "request_escalated"
         | "request_closed"
         | "due_today"
+      repeat_interval: "weekly" | "monthly" | "quarterly" | "half_yearly" | "annually"
       room_status: "available" | "under_maintenance"
       sla_priority: "critical" | "high" | "medium" | "low"
     }
@@ -1363,6 +1425,7 @@ export const Constants = {
         "quality_manager",
       ],
       asset_status: ["operational", "under_maintenance", "in_storage", "retired"],
+      checklist_kind: ["pm", "inspection"],
       contract_kind: ["amc", "camc", "warranty", "extended_warranty"],
       notification_type: [
         "wo_assigned",
@@ -1376,6 +1439,7 @@ export const Constants = {
         "request_closed",
         "due_today",
       ],
+      repeat_interval: ["weekly", "monthly", "quarterly", "half_yearly", "annually"],
       room_status: ["available", "under_maintenance"],
       sla_priority: ["critical", "high", "medium", "low"],
     },

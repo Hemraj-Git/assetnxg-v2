@@ -63,8 +63,8 @@ describe("taxonomyTree", () => {
         { id: "e", code: "ELEC", name: "Electrical", description: null },
       ],
       [
-        { id: "u", categoryId: "e", code: "ELEC-UPS0", name: "UPS", description: null, slaPriority: null, assetFields: [] },
-        { id: "l", categoryId: "e", code: "ELEC-LIGH", name: "Lighting", description: null, slaPriority: "low", assetFields: [] },
+        { id: "u", categoryId: "e", code: "ELEC-UPS0", name: "UPS", description: null, slaPriority: null, assetFields: [], templateIds: [] },
+        { id: "l", categoryId: "e", code: "ELEC-LIGH", name: "Lighting", description: null, slaPriority: "low", assetFields: [], templateIds: [] },
       ],
     );
     expect(rows.map((r) => (r.kind === "category" ? `${r.category.code}(${r.subCount})` : r.sub.code))).toEqual([
